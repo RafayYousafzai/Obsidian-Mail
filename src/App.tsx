@@ -35,11 +35,9 @@ function App() {
   ]);
 
   const [activeAccountId, setActiveAccountId] = useState<string | null>(null);
-  const [isDockHovered, setIsDockHovered] = useState(false);
 
   // Return home logic
   const handleReturnHome = async () => {
-    setIsDockHovered(false);
     if (activeAccountId) {
       try {
         await invoke("hide_isolated_webview", { accountId: activeAccountId });
@@ -72,7 +70,6 @@ function App() {
   }, [activeAccountId]);
 
   const handleSelectAccount = (id: string) => {
-    setIsDockHovered(false);
     setActiveAccountId(id);
   };
 
@@ -99,16 +96,12 @@ function App() {
           <ImmersiveCanvas
             activeAccountId={activeAccountId}
             accounts={accounts}
-            isDockHovered={isDockHovered}
-            onSetDockHovered={setIsDockHovered}
           />
           <HoverDock
             accounts={accounts}
             activeAccountId={activeAccountId}
             onSelectAccount={handleSelectAccount}
             onGoHome={handleReturnHome}
-            isDockHovered={isDockHovered}
-            onSetDockHovered={setIsDockHovered}
           />
         </>
       )}

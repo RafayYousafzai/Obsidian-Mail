@@ -43,8 +43,8 @@ async fn open_isolated_webview(app: AppHandle, account_id: String, url: String) 
     // Add it as a child of the main window
     let size = main_window.inner_size().unwrap();
     let scale_factor = main_window.scale_factor().unwrap_or(1.0);
-    // Default to full window height minus a 32px logical bezel at the bottom
-    let gap_size = (32.0 * scale_factor) as u32;
+    // Default to full window height minus a 70px logical bezel at the bottom
+    let gap_size = (70.0 * scale_factor) as u32;
     let child_height = if size.height > gap_size { size.height - gap_size } else { size.height };
 
     let _child = main_window.add_child(
@@ -63,7 +63,7 @@ async fn hide_isolated_webview(app: AppHandle, account_id: String) {
 }
 
 #[tauri::command]
-async fn resize_isolated_webview(app: AppHandle, account_id: String, width: u32, height: u32, leave_gap: bool) {
+async fn resize_isolated_webview(app: AppHandle, account_id: String, width: u32, height: u32) {
     let main_window = app.get_window("main").unwrap();
     let label = format!("account-{}", account_id);
     if let Some(webview) = app.get_webview(&label) {
@@ -71,9 +71,7 @@ async fn resize_isolated_webview(app: AppHandle, account_id: String, width: u32,
         let physical_width = (width as f64 * scale_factor) as u32;
         let physical_height = (height as f64 * scale_factor) as u32;
         
-        // Scale gap sizes (90 logical px for dock, 32 logical px for bezel)
-        let gap_size = if leave_gap { 90.0 } else { 32.0 };
-        let physical_gap = (gap_size * scale_factor) as u32;
+        let physical_gap = (70.0 * scale_factor) as u32;
         let child_height = if physical_height > physical_gap { physical_height - physical_gap } else { physical_height };
 
         let _ = webview.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(physical_width, child_height)));

@@ -5,8 +5,6 @@ interface HoverDockProps {
   activeAccountId: string;
   onSelectAccount: (id: string) => void;
   onGoHome: () => void;
-  isDockHovered: boolean;
-  onSetDockHovered: (hovered: boolean) => void;
 }
 
 export default function HoverDock({
@@ -14,8 +12,6 @@ export default function HoverDock({
   activeAccountId,
   onSelectAccount,
   onGoHome,
-  isDockHovered,
-  onSetDockHovered,
 }: HoverDockProps) {
   // Helper to render platform colors
   const getBrandColor = (type: "gmail" | "outlook" | "icloud") => {
@@ -53,14 +49,7 @@ export default function HoverDock({
   };
 
   return (
-    <div
-      onMouseLeave={() => onSetDockHovered(false)}
-      className={`fixed bottom-0 left-0 right-0 h-[90px] bg-obsidian-canvas border-t border-obsidian-border flex items-center justify-center transition-all duration-350 ease-out z-50 ${
-        isDockHovered
-          ? "translate-y-0 opacity-100"
-          : "translate-y-[90px] opacity-0 pointer-events-none"
-      }`}
-    >
+    <div className="fixed bottom-0 left-0 right-0 h-[70px] flex items-center justify-center z-30 select-none">
       <div className="bg-obsidian/60 border border-obsidian-border rounded-full px-4 py-2 shadow-2xl flex items-center gap-3">
         
         {/* Home Launcher Button */}
