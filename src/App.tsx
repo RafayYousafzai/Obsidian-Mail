@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import AmbientGrid from "./components/AmbientGrid";
 import ImmersiveCanvas from "./components/ImmersiveCanvas";
 import HoverDock from "./components/HoverDock";
@@ -34,9 +35,11 @@ function App() {
   ]);
 
   const [activeAccountId, setActiveAccountId] = useState<string | null>(null);
+  const [isDockHovered, setIsDockHovered] = useState(false);
 
   // Return home logic
   const handleReturnHome = async () => {
+    setIsDockHovered(false);
     if (activeAccountId) {
       try {
         await invoke("hide_isolated_webview", { accountId: activeAccountId });
@@ -56,10 +59,20 @@ function App() {
       }
     };
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+
+    // Listen to native tauri event injected in webview
+    const unlistenPromise = listen("go-home", () => {
+      handleReturnHome();
+    });
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      unlistenPromise.then((unlisten) => unlisten());
+    };
   }, [activeAccountId]);
 
   const handleSelectAccount = (id: string) => {
+    setIsDockHovered(false);
     setActiveAccountId(id);
   };
 
@@ -86,12 +99,16 @@ function App() {
           <ImmersiveCanvas
             activeAccountId={activeAccountId}
             accounts={accounts}
+            isDockHovered={isDockHovered}
+            onSetDockHovered={setIsDockHovered}
           />
           <HoverDock
             accounts={accounts}
             activeAccountId={activeAccountId}
             onSelectAccount={handleSelectAccount}
             onGoHome={handleReturnHome}
+            isDockHovered={isDockHovered}
+            onSetDockHovered={setIsDockHovered}
           />
         </>
       )}

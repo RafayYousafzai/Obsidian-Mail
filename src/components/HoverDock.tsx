@@ -5,6 +5,8 @@ interface HoverDockProps {
   activeAccountId: string;
   onSelectAccount: (id: string) => void;
   onGoHome: () => void;
+  isDockHovered: boolean;
+  onSetDockHovered: (hovered: boolean) => void;
 }
 
 export default function HoverDock({
@@ -12,6 +14,8 @@ export default function HoverDock({
   activeAccountId,
   onSelectAccount,
   onGoHome,
+  isDockHovered,
+  onSetDockHovered,
 }: HoverDockProps) {
   // Helper to render platform colors
   const getBrandColor = (type: "gmail" | "outlook" | "icloud") => {
@@ -49,53 +53,52 @@ export default function HoverDock({
   };
 
   return (
-    <>
-      {/* Edge Hover Trigger Zone (Invisible block at the bottom of viewport) */}
-      <div className="fixed bottom-0 left-0 right-0 h-10 bg-transparent z-40 group/trigger">
+    <div
+      onMouseLeave={() => onSetDockHovered(false)}
+      className={`fixed bottom-4 left-1/2 -translate-x-1/2 transition-all duration-300 ease-out z-50 ${
+        isDockHovered
+          ? "translate-y-0 opacity-100"
+          : "translate-y-16 opacity-0 pointer-events-none"
+      }`}
+    >
+      <div className="bg-obsidian-canvas/90 backdrop-blur-md border border-obsidian-border rounded-full px-4 py-2.5 shadow-2xl flex items-center gap-3">
         
-        {/* Dock Wrapper: Moves up when user hovers trigger zone or dock itself */}
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 translate-y-16 opacity-0 hover:translate-y-0 hover:opacity-100 group-hover/trigger:translate-y-0 group-hover/trigger:opacity-100 transition-all duration-300 ease-out z-50">
-          
-          <div className="bg-obsidian-canvas/90 backdrop-blur-md border border-obsidian-border rounded-full px-4 py-2.5 shadow-2xl flex items-center gap-3">
-            
-            {/* Home Launcher Button */}
-            <button
-              onClick={onGoHome}
-              title="Return to Launcher"
-              className="p-2.5 rounded-full bg-obsidian border border-obsidian-border text-obsidian-text-muted hover:text-white hover:border-purple-500/40 hover:bg-purple-500/10 transition-all cursor-pointer focus:outline-none"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-              </svg>
-            </button>
+        {/* Home Launcher Button */}
+        <button
+          onClick={onGoHome}
+          title="Return to Launcher"
+          className="p-2.5 rounded-full bg-obsidian border border-obsidian-border text-obsidian-text-muted hover:text-white hover:border-purple-500/40 hover:bg-purple-500/10 transition-all cursor-pointer focus:outline-none"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+          </svg>
+        </button>
 
-            {/* Divider */}
-            <div className="h-6 w-px bg-obsidian-border" />
+        {/* Divider */}
+        <div className="h-6 w-px bg-obsidian-border" />
 
-            {/* Account Switcher List */}
-            <div className="flex items-center gap-2">
-              {accounts.map((account) => {
-                const isActive = account.id === activeAccountId;
-                return (
-                  <button
-                    key={account.id}
-                    onClick={() => onSelectAccount(account.id)}
-                    title={account.name}
-                    className={`p-2.5 rounded-full bg-obsidian border transition-all cursor-pointer focus:outline-none flex items-center justify-center ${
-                      isActive
-                        ? "border-purple-500 text-purple-400 ring-2 ring-purple-500/20 scale-105"
-                        : `border-obsidian-border ${getBrandColor(account.type)}`
-                    }`}
-                  >
-                    {getBrandIcon(account.type)}
-                  </button>
-                );
-              })}
-            </div>
-
-          </div>
+        {/* Account Switcher List */}
+        <div className="flex items-center gap-2">
+          {accounts.map((account) => {
+            const isActive = account.id === activeAccountId;
+            return (
+              <button
+                key={account.id}
+                onClick={() => onSelectAccount(account.id)}
+                title={account.name}
+                className={`p-2.5 rounded-full bg-obsidian border transition-all cursor-pointer focus:outline-none flex items-center justify-center ${
+                  isActive
+                    ? "border-purple-500 text-purple-400 ring-2 ring-purple-500/20 scale-105"
+                    : `border-obsidian-border ${getBrandColor(account.type)}`
+                }`}
+              >
+                {getBrandIcon(account.type)}
+              </button>
+            );
+          })}
         </div>
+
       </div>
-    </>
+    </div>
   );
 }

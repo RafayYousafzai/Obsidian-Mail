@@ -1,4 +1,5 @@
-use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Emitter, Manager, WebviewUrl};
+use tauri::webview::WebviewBuilder;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -7,33 +8,76 @@ fn greet(name: &str) -> String {
 }
 
 #[tauri::command]
-async fn open_isolated_webview(app: tauri::AppHandle, account_id: String, url: String) {
+async fn open_isolated_webview(app: AppHandle, account_id: String, url: String) {
+    let main_window = app.get_window("main").unwrap();
+    let label = format!("account-{}", account_id);
+
+    // Resolve unique data path
     let mut data_path = app.path().app_data_dir().unwrap();
     data_path.push(format!("sessions/account_{}", account_id));
 
-    let label = format!("account-{}", account_id);
-
-    // If window already exists, show and focus it
-    if let Some(window) = app.get_webview_window(&label) {
-        let _ = window.show();
-        let _ = window.set_focus();
+    // If webview already exists, show and focus it
+    if let Some(webview) = app.get_webview(&label) {
+        let _ = webview.show();
+        let _ = webview.set_focus();
         return;
     }
 
-    WebviewWindowBuilder::new(&app, label, WebviewUrl::External(url.parse().unwrap()))
+    // Build the child webview with initialization script to intercept keys
+    let webview_builder = WebviewBuilder::new(&label, WebviewUrl::External(url.parse().unwrap()))
         .data_directory(data_path)
-        .decorations(false)
-        .inner_size(1200.0, 800.0) // Match main window dimensions
-        .build()
-        .unwrap();
+        .initialization_script(r#"
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' || (e.ctrlKey && e.key.toLowerCase() === 'h')) {
+                    window.ipc.postMessage(JSON.stringify({
+                        cmd: 'go_home_command',
+                        callback: 0,
+                        error: 0
+                    }));
+                }
+            });
+        "#);
+
+    // Add it as a child of the main window
+    let size = main_window.inner_size().unwrap();
+    // Default to full window height minus a 6px bezel at the bottom
+    let child_height = if size.height > 6 { size.height - 6 } else { size.height };
+
+    let _child = main_window.add_child(
+        webview_builder,
+        tauri::PhysicalPosition::new(0, 0),
+        tauri::PhysicalSize::new(size.width, child_height),
+    ).unwrap();
 }
 
 #[tauri::command]
-async fn hide_isolated_webview(app: tauri::AppHandle, account_id: String) {
+async fn hide_isolated_webview(app: AppHandle, account_id: String) {
     let label = format!("account-{}", account_id);
-    if let Some(window) = app.get_webview_window(&label) {
-        let _ = window.hide();
+    if let Some(webview) = app.get_webview(&label) {
+        let _ = webview.hide();
     }
+}
+
+#[tauri::command]
+async fn resize_isolated_webview(app: AppHandle, account_id: String, width: u32, height: u32, leave_gap: bool) {
+    let main_window = app.get_window("main").unwrap();
+    let label = format!("account-{}", account_id);
+    if let Some(webview) = app.get_webview(&label) {
+        let scale_factor = main_window.scale_factor().unwrap_or(1.0);
+        let physical_width = (width as f64 * scale_factor) as u32;
+        let physical_height = (height as f64 * scale_factor) as u32;
+        
+        // If dock is hovered, leave 90px. Otherwise, leave a tiny 6px bezel.
+        let gap_size = if leave_gap { 90 } else { 6 };
+        let child_height = if physical_height > gap_size { physical_height - gap_size } else { physical_height };
+
+        let _ = webview.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(physical_width, child_height)));
+    }
+}
+
+#[tauri::command]
+async fn go_home_command(app: AppHandle) {
+    let _ = app.emit("go-home", ());
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -43,7 +87,9 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             greet,
             open_isolated_webview,
-            hide_isolated_webview
+            hide_isolated_webview,
+            resize_isolated_webview,
+            go_home_command
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
