@@ -83,31 +83,37 @@ export default function ImmersiveCanvas({
     };
   }, [activeAccountId, isDockHovered]);
 
-  return (
-    <div className="absolute inset-x-0 bottom-0 h-[90px] bg-transparent flex flex-col justify-end items-center select-none text-center p-6 pointer-events-none">
-      
-      {/* Sleek bottom status only shown when NOT hovered */}
-      {!isDockHovered && (
-        <div className="space-y-1 animate-fade-in pointer-events-none mb-2 select-none">
-          <div className="flex space-x-1.5 items-center justify-center">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-purple-500"></span>
-            </span>
-            <span className="text-[8px] uppercase tracking-widest text-obsidian-text-muted/50 font-semibold">
-              Connected
-            </span>
-          </div>
-        </div>
-      )}
+  // If dock is hovered, the status bar hides to let the HoverDock draw in the 90px space
+  if (isDockHovered) {
+    return null;
+  }
 
-      {/* Invisible trigger zone at the absolute bottom of main window (8px bezel) */}
-      {!isDockHovered && (
-        <div
-          onMouseEnter={() => onSetDockHovered(true)}
-          className="absolute bottom-0 left-0 right-0 h-2 bg-transparent pointer-events-auto cursor-ns-resize hover:bg-purple-500/10 transition-colors z-40"
-        />
-      )}
+  const activeAccount = accounts.find((a) => a.id === activeAccountId);
+
+  return (
+    <div className="absolute inset-x-0 bottom-0 h-[32px] bg-obsidian-canvas border-t border-obsidian-border flex items-center justify-between px-6 select-none z-30">
+      
+      {/* Connected Status Info */}
+      <div className="flex items-center space-x-2.5">
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+        </span>
+        <span className="text-[10px] uppercase tracking-wider text-gray-200 font-extrabold">
+          {activeAccount?.name || "Session"} Connected
+        </span>
+      </div>
+
+      {/* Guide Hint */}
+      <div className="text-[10px] text-obsidian-text-muted select-none flex items-center gap-1.5">
+        Press <kbd className="bg-obsidian border border-obsidian-border px-1.5 py-0.5 rounded text-white text-[9px] shadow-sm font-semibold">Esc</kbd> or <kbd className="bg-obsidian border border-obsidian-border px-1.5 py-0.5 rounded text-white text-[9px] shadow-sm font-semibold">Ctrl + H</kbd> to return home
+      </div>
+
+      {/* Ergonomic Hover Trigger Zone: Full width/height of the status bar */}
+      <div
+        onMouseEnter={() => onSetDockHovered(true)}
+        className="absolute inset-0 bg-transparent cursor-ns-resize hover:bg-purple-500/5 transition-colors z-40"
+      />
       
     </div>
   );

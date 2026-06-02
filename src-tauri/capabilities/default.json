@@ -6,5 +6,15 @@
   "permissions": [
     "core:default",
     "opener:default"
-  ]
+  ],
+  "remote": {
+    "urls": [
+      "https://mail.google.com/**",
+      "https://outlook.live.com/**",
+      "https://www.icloud.com/**",
+      "https://*.google.com/**",
+      "https://*.live.com/**",
+      "https://*.icloud.com/**"
+    ]
+  }
 }

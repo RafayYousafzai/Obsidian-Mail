@@ -55,13 +55,13 @@ export default function HoverDock({
   return (
     <div
       onMouseLeave={() => onSetDockHovered(false)}
-      className={`fixed bottom-4 left-1/2 -translate-x-1/2 transition-all duration-300 ease-out z-50 ${
+      className={`fixed bottom-0 left-0 right-0 h-[90px] bg-obsidian-canvas border-t border-obsidian-border flex items-center justify-center transition-all duration-350 ease-out z-50 ${
         isDockHovered
           ? "translate-y-0 opacity-100"
-          : "translate-y-16 opacity-0 pointer-events-none"
+          : "translate-y-[90px] opacity-0 pointer-events-none"
       }`}
     >
-      <div className="bg-obsidian-canvas/90 backdrop-blur-md border border-obsidian-border rounded-full px-4 py-2.5 shadow-2xl flex items-center gap-3">
+      <div className="bg-obsidian/60 border border-obsidian-border rounded-full px-4 py-2 shadow-2xl flex items-center gap-3">
         
         {/* Home Launcher Button */}
         <button
