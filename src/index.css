@@ -1,0 +1,18 @@
+@import "tailwindcss"; /* This is how Tailwind v4 is imported now! */
+
+@theme {
+  /* Defining your custom Obsidian Industrial palette natively */
+  --color-obsidian: #0b0b0c;
+  --color-obsidian-canvas: #111112;
+  --color-obsidian-border: #222224;
+  --color-obsidian-text-muted: #8a8a93;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-obsidian);
+  color: #f3f4f6;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  overflow: hidden;
+  user-select: none;
+}
