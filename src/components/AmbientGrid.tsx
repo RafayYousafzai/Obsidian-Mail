@@ -4,20 +4,47 @@ import { Account } from "../App";
 interface AmbientGridProps {
   accounts: Account[];
   onSelectAccount: (id: string) => void;
-  onAddAccount: (name: string, type: "gmail" | "outlook" | "icloud", url: string) => void;
+  onAddAccount: (name: string, type: "gmail" | "outlook" | "icloud", url: string, iconUrl?: string) => void;
+  onEditAccount: (id: string, name: string, type: "gmail" | "outlook" | "icloud", url: string, iconUrl?: string) => void;
+  onDeleteAccount: (id: string) => void;
+  onReorderAccounts: (id: string, direction: "left" | "right") => void;
 }
 
 export default function AmbientGrid({
   accounts,
   onSelectAccount,
   onAddAccount,
+  onEditAccount,
+  onDeleteAccount,
+  onReorderAccounts,
 }: AmbientGridProps) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newName, setNewName] = useState("");
   const [newType, setNewType] = useState<"gmail" | "outlook" | "icloud">("gmail");
   const [newUrl, setNewUrl] = useState("https://mail.google.com");
+  const [newIconUrl, setNewIconUrl] = useState<string | undefined>(undefined);
 
-  // Automatically update default URL based on type
+  // Edit Modal State
+  const [editingAccount, setEditingAccount] = useState<Account | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editType, setEditType] = useState<"gmail" | "outlook" | "icloud">("gmail");
+  const [editUrl, setEditUrl] = useState("");
+  const [editIconUrl, setEditIconUrl] = useState<string | undefined>(undefined);
+
+  // Track image load errors to fallback to default SVG
+  const [iconErrors, setIconErrors] = useState<Record<string, boolean>>({});
+
+  // Populate edit fields when editing state changes
+  useEffect(() => {
+    if (editingAccount) {
+      setEditName(editingAccount.name);
+      setEditType(editingAccount.type);
+      setEditUrl(editingAccount.url);
+      setEditIconUrl(editingAccount.iconUrl);
+    }
+  }, [editingAccount]);
+
+  // Automatically update default URL based on type in Add Modal
   useEffect(() => {
     if (newType === "gmail") setNewUrl("https://mail.google.com");
     else if (newType === "outlook") setNewUrl("https://outlook.live.com");
@@ -27,7 +54,6 @@ export default function AmbientGrid({
   // Keyboard shortcut listener for numbers (1, 2, 3...)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger shortcuts if user is typing in inputs
       if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "SELECT") {
         return;
       }
@@ -42,12 +68,51 @@ export default function AmbientGrid({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [accounts, onSelectAccount]);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const resultStr = reader.result as string;
+        if (isEdit) {
+          setEditIconUrl(resultStr);
+        } else {
+          setNewIconUrl(resultStr);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newName.trim() || !newUrl.trim()) return;
-    onAddAccount(newName, newType, newUrl);
+    onAddAccount(newName, newType, newUrl, newIconUrl);
     setNewName("");
+    setNewIconUrl(undefined);
     setShowAddModal(false);
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAccount || !editName.trim() || !editUrl.trim()) return;
+    onEditAccount(editingAccount.id, editName, editType, editUrl, editIconUrl);
+    // Reset icon error state in case it loaded correctly now
+    if (editingAccount.id in iconErrors) {
+      const copy = { ...iconErrors };
+      delete copy[editingAccount.id];
+      setIconErrors(copy);
+    }
+    setEditingAccount(null);
+  };
+
+  const handleDelete = () => {
+    if (editingAccount) {
+      if (window.confirm(`Are you sure you want to remove ${editingAccount.name}?`)) {
+        onDeleteAccount(editingAccount.id);
+        setEditingAccount(null);
+      }
+    }
   };
 
   // Helper to render platform SVGs
@@ -74,6 +139,22 @@ export default function AmbientGrid({
     }
   };
 
+  const renderIcon = (account: Account) => {
+    if (account.iconUrl && !iconErrors[account.id]) {
+      return (
+        <img
+          src={account.iconUrl}
+          alt={account.name}
+          className="w-10 h-10 object-contain rounded-lg animate-fade-in"
+          onError={() => {
+            setIconErrors((prev) => ({ ...prev, [account.id]: true }));
+          }}
+        />
+      );
+    }
+    return getIcon(account.type);
+  };
+
   return (
     <main className="min-h-screen bg-obsidian flex flex-col justify-center items-center px-6 py-12 relative w-screen h-screen">
       
@@ -90,19 +171,75 @@ export default function AmbientGrid({
       {/* Grid Container */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-4xl w-full">
         {accounts.map((account, index) => (
-          <button
+          <div
             key={account.id}
             onClick={() => onSelectAccount(account.id)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                onSelectAccount(account.id);
+              }
+            }}
             className="group text-left relative bg-obsidian-canvas border border-obsidian-border hover:border-purple-500/30 rounded-2xl p-6 shadow-xl hover:shadow-purple-500/5 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer flex flex-col justify-between h-48 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
           >
-            {/* Shortcut Badge */}
-            <span className="absolute top-4 right-4 bg-obsidian border border-obsidian-border text-[10px] font-bold text-obsidian-text-muted px-2 py-0.5 rounded-md group-hover:border-purple-500/30 group-hover:text-purple-400 transition-colors">
-              {index + 1}
-            </span>
+            {/* Controls Container */}
+            <div className="absolute top-4 right-4 flex items-center gap-1.5 z-10">
+              {/* Move Left Button */}
+              {index > 0 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onReorderAccounts(account.id, "left");
+                  }}
+                  title="Move Left"
+                  className="opacity-0 group-hover:opacity-100 p-1 rounded bg-obsidian border border-obsidian-border hover:border-purple-500/30 hover:bg-purple-500/10 text-obsidian-text-muted hover:text-white transition-all cursor-pointer focus:outline-none flex items-center justify-center"
+                >
+                  <svg className="w-3.5 h-3.5 text-obsidian-text-muted hover:text-purple-400 transition-colors" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                  </svg>
+                </button>
+              )}
+
+              {/* Move Right Button */}
+              {index < accounts.length - 1 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onReorderAccounts(account.id, "right");
+                  }}
+                  title="Move Right"
+                  className="opacity-0 group-hover:opacity-100 p-1 rounded bg-obsidian border border-obsidian-border hover:border-purple-500/30 hover:bg-purple-500/10 text-obsidian-text-muted hover:text-white transition-all cursor-pointer focus:outline-none flex items-center justify-center"
+                >
+                  <svg className="w-3.5 h-3.5 text-obsidian-text-muted hover:text-purple-400 transition-colors" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                  </svg>
+                </button>
+              )}
+
+              {/* Edit Button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setEditingAccount(account);
+                }}
+                title="Edit Mailbox"
+                className="opacity-0 group-hover:opacity-100 p-1 rounded bg-obsidian border border-obsidian-border hover:border-purple-500/30 hover:bg-purple-500/10 text-obsidian-text-muted hover:text-white transition-all cursor-pointer focus:outline-none flex items-center justify-center"
+              >
+                <svg className="w-3.5 h-3.5 text-obsidian-text-muted hover:text-purple-400 transition-colors" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
+                </svg>
+              </button>
+
+              {/* Shortcut Badge */}
+              <span className="bg-obsidian border border-obsidian-border text-[10px] font-bold text-obsidian-text-muted px-2 py-0.5 rounded-md group-hover:border-purple-500/30 group-hover:text-purple-400 transition-colors flex items-center justify-center h-[24px]">
+                {index + 1}
+              </span>
+            </div>
 
             {/* Platform Icon */}
             <div className="p-3 bg-obsidian rounded-xl border border-obsidian-border group-hover:border-purple-500/20 transition-colors w-fit">
-              {getIcon(account.type)}
+              {renderIcon(account)}
             </div>
 
             {/* Account Info */}
@@ -114,7 +251,7 @@ export default function AmbientGrid({
                 {account.url}
               </p>
             </div>
-          </button>
+          </div>
         ))}
 
         {/* Add Account Card */}
@@ -140,7 +277,10 @@ export default function AmbientGrid({
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-bold text-white">Add Isolated Account</h3>
               <button
-                onClick={() => setShowAddModal(false)}
+                onClick={() => {
+                  setShowAddModal(false);
+                  setNewIconUrl(undefined);
+                }}
                 className="text-obsidian-text-muted hover:text-white transition-colors cursor-pointer"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -190,6 +330,46 @@ export default function AmbientGrid({
                 />
               </div>
 
+              {/* Custom Icon Image Upload */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase text-obsidian-text-muted block">Custom Icon (Optional)</label>
+                <div className="flex items-center gap-4">
+                  {newIconUrl ? (
+                    <div className="relative">
+                      <img src={newIconUrl} alt="Custom Preview" className="w-12 h-12 object-contain bg-obsidian p-1 rounded-xl border border-obsidian-border" />
+                      <button
+                        type="button"
+                        onClick={() => setNewIconUrl(undefined)}
+                        title="Remove custom icon"
+                        className="absolute -top-1.5 -right-1.5 bg-red-500/80 hover:bg-red-600 text-white rounded-full p-0.5 cursor-pointer transition-colors"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="w-12 h-12 flex items-center justify-center bg-obsidian border-2 border-dashed border-obsidian-border rounded-xl text-obsidian-text-muted">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                      </svg>
+                    </div>
+                  )}
+
+                  <label className="flex-1 cursor-pointer">
+                    <span className="block w-full py-2.5 px-3 bg-obsidian border border-obsidian-border hover:border-purple-500/40 text-center rounded-xl text-xs font-bold text-obsidian-text-muted hover:text-white transition-all">
+                      Choose Custom Logo Image
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileChange(e, false)}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              </div>
+
               {/* Submit Button */}
               <button
                 type="submit"
@@ -197,6 +377,124 @@ export default function AmbientGrid({
               >
                 Create Isolated Instance
               </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Account Modal Overlay */}
+      {editingAccount && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+          <div className="w-full max-w-md bg-obsidian-canvas border border-obsidian-border rounded-2xl p-8 shadow-2xl flex flex-col space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-bold text-white">Edit Mailbox Settings</h3>
+              <button
+                onClick={() => setEditingAccount(null)}
+                className="text-obsidian-text-muted hover:text-white transition-colors cursor-pointer"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              {/* Account Name */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase text-obsidian-text-muted">Account Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g., Personal Outlook"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full bg-obsidian border border-obsidian-border focus:border-purple-500/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder-obsidian-text-muted outline-none transition-colors"
+                  required
+                />
+              </div>
+
+              {/* Service Type */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase text-obsidian-text-muted">Service Type</label>
+                <select
+                  value={editType}
+                  onChange={(e) => setEditType(e.target.value as any)}
+                  className="w-full bg-obsidian border border-obsidian-border focus:border-purple-500/50 rounded-xl px-4 py-2.5 text-sm text-white outline-none transition-colors"
+                >
+                  <option value="gmail">Gmail</option>
+                  <option value="outlook">Outlook</option>
+                  <option value="icloud">iCloud Mail</option>
+                </select>
+              </div>
+
+              {/* URL */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase text-obsidian-text-muted">Service URL</label>
+                <input
+                  type="url"
+                  placeholder="https://..."
+                  value={editUrl}
+                  onChange={(e) => setEditUrl(e.target.value)}
+                  className="w-full bg-obsidian border border-obsidian-border focus:border-purple-500/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder-obsidian-text-muted outline-none transition-colors"
+                  required
+                />
+              </div>
+
+              {/* Custom Icon Image Upload */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase text-obsidian-text-muted block">Custom Icon</label>
+                <div className="flex items-center gap-4">
+                  {editIconUrl ? (
+                    <div className="relative">
+                      <img src={editIconUrl} alt="Custom Preview" className="w-12 h-12 object-contain bg-obsidian p-1 rounded-xl border border-obsidian-border" />
+                      <button
+                        type="button"
+                        onClick={() => setEditIconUrl(undefined)}
+                        title="Remove custom icon"
+                        className="absolute -top-1.5 -right-1.5 bg-red-500/80 hover:bg-red-600 text-white rounded-full p-0.5 cursor-pointer transition-colors"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="w-12 h-12 flex items-center justify-center bg-obsidian border-2 border-dashed border-obsidian-border rounded-xl text-obsidian-text-muted">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                      </svg>
+                    </div>
+                  )}
+
+                  <label className="flex-1 cursor-pointer">
+                    <span className="block w-full py-2.5 px-3 bg-obsidian border border-obsidian-border hover:border-purple-500/40 text-center rounded-xl text-xs font-bold text-obsidian-text-muted hover:text-white transition-all">
+                      Choose Custom Logo Image
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileChange(e, true)}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  className="w-1/3 py-3 px-4 border border-red-500/30 bg-red-950/20 hover:bg-red-500/20 text-red-400 font-bold text-sm rounded-xl transition-all cursor-pointer active:scale-98"
+                >
+                  Delete
+                </button>
+                <button
+                  type="submit"
+                  className="w-2/3 py-3 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm rounded-xl transition-all cursor-pointer active:scale-98"
+                >
+                  Save Changes
+                </button>
+              </div>
             </form>
           </div>
         </div>

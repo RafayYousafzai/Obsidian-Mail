@@ -10,31 +10,51 @@ export interface Account {
   name: string;
   type: "gmail" | "outlook" | "icloud";
   url: string;
+  iconUrl?: string;
 }
 
+const DEFAULT_ACCOUNTS: Account[] = [
+  {
+    id: "work-gmail",
+    name: "Work Mail",
+    type: "gmail",
+    url: "https://mail.google.com",
+    iconUrl: "/logos/gmail.png",
+  },
+  {
+    id: "personal-outlook",
+    name: "Personal Outlook",
+    type: "outlook",
+    url: "https://outlook.live.com",
+    iconUrl: "/logos/outlook.png",
+  },
+  {
+    id: "icloud-dev",
+    name: "Developer Mail",
+    type: "icloud",
+    url: "https://www.icloud.com/mail",
+  },
+];
+
 function App() {
-  const [accounts, setAccounts] = useState<Account[]>([
-    {
-      id: "work-gmail",
-      name: "Work Mail",
-      type: "gmail",
-      url: "https://mail.google.com",
-    },
-    {
-      id: "personal-outlook",
-      name: "Personal Outlook",
-      type: "outlook",
-      url: "https://outlook.live.com",
-    },
-    {
-      id: "icloud-dev",
-      name: "Developer Mail",
-      type: "icloud",
-      url: "https://www.icloud.com/mail",
-    },
-  ]);
+  const [accounts, setAccounts] = useState<Account[]>(() => {
+    const saved = localStorage.getItem("obsidian_accounts");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (err) {
+        console.error("Failed to parse saved accounts:", err);
+      }
+    }
+    return DEFAULT_ACCOUNTS;
+  });
 
   const [activeAccountId, setActiveAccountId] = useState<string | null>(null);
+
+  // Sync to localStorage
+  useEffect(() => {
+    localStorage.setItem("obsidian_accounts", JSON.stringify(accounts));
+  }, [accounts]);
 
   // Return home logic
   const handleReturnHome = async () => {
@@ -73,14 +93,60 @@ function App() {
     setActiveAccountId(id);
   };
 
-  const handleAddAccount = (name: string, type: "gmail" | "outlook" | "icloud", url: string) => {
+  const handleAddAccount = (
+    name: string,
+    type: "gmail" | "outlook" | "icloud",
+    url: string,
+    iconUrl?: string
+  ) => {
     const newAccount: Account = {
       id: `acc-${Date.now()}`,
       name,
       type,
       url,
+      iconUrl,
     };
     setAccounts((prev) => [...prev, newAccount]);
+  };
+
+  const handleEditAccount = (
+    id: string,
+    name: string,
+    type: "gmail" | "outlook" | "icloud",
+    url: string,
+    iconUrl?: string
+  ) => {
+    setAccounts((prev) =>
+      prev.map((acc) =>
+        acc.id === id ? { ...acc, name, type, url, iconUrl } : acc
+      )
+    );
+  };
+
+  const handleDeleteAccount = (id: string) => {
+    setAccounts((prev) => prev.filter((acc) => acc.id !== id));
+    if (activeAccountId === id) {
+      setActiveAccountId(null);
+    }
+  };
+
+  const handleReorderAccounts = (id: string, direction: "left" | "right") => {
+    setAccounts((prev) => {
+      const index = prev.findIndex((acc) => acc.id === id);
+      if (index === -1) return prev;
+
+      const newAccounts = [...prev];
+      if (direction === "left" && index > 0) {
+        const temp = newAccounts[index];
+        newAccounts[index] = newAccounts[index - 1];
+        newAccounts[index - 1] = temp;
+      } else if (direction === "right" && index < prev.length - 1) {
+        const temp = newAccounts[index];
+        newAccounts[index] = newAccounts[index + 1];
+        newAccounts[index + 1] = temp;
+      }
+      return newAccounts;
+    });
   };
 
   return (
@@ -90,6 +156,9 @@ function App() {
           accounts={accounts}
           onSelectAccount={handleSelectAccount}
           onAddAccount={handleAddAccount}
+          onEditAccount={handleEditAccount}
+          onDeleteAccount={handleDeleteAccount}
+          onReorderAccounts={handleReorderAccounts}
         />
       ) : (
         <>

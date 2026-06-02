@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Account } from "../App";
 
 interface HoverDockProps {
@@ -13,6 +14,8 @@ export default function HoverDock({
   onSelectAccount,
   onGoHome,
 }: HoverDockProps) {
+  const [iconErrors, setIconErrors] = useState<Record<string, boolean>>({});
+
   // Helper to render platform colors
   const getBrandColor = (type: "gmail" | "outlook" | "icloud") => {
     switch (type) {
@@ -48,15 +51,31 @@ export default function HoverDock({
     }
   };
 
+  const renderIcon = (account: Account) => {
+    if (account.iconUrl && !iconErrors[account.id]) {
+      return (
+        <img
+          src={account.iconUrl}
+          alt={account.name}
+          className="w-5 h-5 object-contain rounded-md"
+          onError={() => {
+            setIconErrors((prev) => ({ ...prev, [account.id]: true }));
+          }}
+        />
+      );
+    }
+    return getBrandIcon(account.type);
+  };
+
   return (
     <div className="fixed bottom-0 left-0 right-0 h-[70px] flex items-center justify-center z-30 select-none">
-      <div className="bg-obsidian/60 border border-obsidian-border rounded-full px-4 py-2 shadow-2xl flex items-center gap-3">
+      <div className="flex items-center gap-3">
         
         {/* Home Launcher Button */}
         <button
           onClick={onGoHome}
           title="Return to Launcher"
-          className="p-2.5 rounded-full bg-obsidian border border-obsidian-border text-obsidian-text-muted hover:text-white hover:border-purple-500/40 hover:bg-purple-500/10 transition-all cursor-pointer focus:outline-none"
+          className="p-2.5 rounded-full bg-obsidian border border-obsidian-border text-obsidian-text-muted hover:text-white hover:border-purple-500/40 hover:bg-purple-500/10 transition-all cursor-pointer focus:outline-none flex items-center justify-center"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
@@ -81,7 +100,7 @@ export default function HoverDock({
                     : `border-obsidian-border ${getBrandColor(account.type)}`
                 }`}
               >
-                {getBrandIcon(account.type)}
+                {renderIcon(account)}
               </button>
             );
           })}
