@@ -150,7 +150,9 @@ function App() {
   };
 
   return (
-    <div className="relative min-h-screen bg-obsidian text-white overflow-hidden select-none">
+    <div className={`relative h-screen bg-obsidian text-white select-none ${
+      activeAccountId === null ? "overflow-y-auto" : "overflow-hidden"
+    }`}>
       {activeAccountId === null ? (
         <AmbientGrid
           accounts={accounts}
