@@ -156,12 +156,17 @@ export default function AmbientGrid({
   };
 
   return (
-    <main className="min-h-screen bg-obsidian flex flex-col justify-center items-center px-6 py-12 relative w-screen h-screen">
+    <main className="min-h-screen bg-obsidian flex flex-col justify-center items-center px-6 py-12 relative w-screen h-screen animate-slide-up-fade">
       
-      {/* Title */}
-      <div className="text-center space-y-3 mb-16 animate-fade-in">
+      {/* Title & App Logo */}
+      <div className="text-center space-y-4 mb-16 animate-fade-in flex flex-col items-center">
+        <img
+          src="/AppLogo.png"
+          alt="Obsidian Mail Logo"
+          className="w-20 h-20 object-contain mb-2 filter drop-shadow-[0_0_12px_rgba(168,85,247,0.25)] hover:scale-105 transition-transform duration-300"
+        />
         <h1 className="text-4xl font-extrabold tracking-wider bg-gradient-to-r from-white via-gray-300 to-obsidian-text-muted bg-clip-text text-transparent uppercase">
-          Obsidian Launcher
+          Obsidian Mail
         </h1>
         <p className="text-sm text-obsidian-text-muted tracking-widest uppercase">
           Select an account or use number shortcuts [1 - {accounts.length}]
@@ -181,7 +186,7 @@ export default function AmbientGrid({
                 onSelectAccount(account.id);
               }
             }}
-            className="group text-left relative bg-obsidian-canvas border border-obsidian-border hover:border-purple-500/30 rounded-2xl p-6 shadow-xl hover:shadow-purple-500/5 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer flex flex-col justify-between h-48 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+            className="group text-left relative bg-obsidian-canvas border border-obsidian-border/40 hover:border-obsidian-border hover:border-purple-500/30 rounded-2xl p-6 shadow-xl hover:shadow-purple-500/5 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer flex flex-col justify-between h-48 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
           >
             {/* Controls Container */}
             <div className="absolute top-4 right-4 flex items-center gap-1.5 z-10">
@@ -193,7 +198,7 @@ export default function AmbientGrid({
                     onReorderAccounts(account.id, "left");
                   }}
                   title="Move Left"
-                  className="opacity-0 group-hover:opacity-100 p-1 rounded bg-obsidian border border-obsidian-border hover:border-purple-500/30 hover:bg-purple-500/10 text-obsidian-text-muted hover:text-white transition-all cursor-pointer focus:outline-none flex items-center justify-center"
+                  className="opacity-0 group-hover:opacity-100 p-1 rounded bg-obsidian border border-obsidian-border/40 hover:border-purple-500/30 hover:bg-purple-500/10 text-obsidian-text-muted hover:text-white transition-all cursor-pointer focus:outline-none flex items-center justify-center"
                 >
                   <svg className="w-3.5 h-3.5 text-obsidian-text-muted hover:text-purple-400 transition-colors" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -209,7 +214,7 @@ export default function AmbientGrid({
                     onReorderAccounts(account.id, "right");
                   }}
                   title="Move Right"
-                  className="opacity-0 group-hover:opacity-100 p-1 rounded bg-obsidian border border-obsidian-border hover:border-purple-500/30 hover:bg-purple-500/10 text-obsidian-text-muted hover:text-white transition-all cursor-pointer focus:outline-none flex items-center justify-center"
+                  className="opacity-0 group-hover:opacity-100 p-1 rounded bg-obsidian border border-obsidian-border/40 hover:border-purple-500/30 hover:bg-purple-500/10 text-obsidian-text-muted hover:text-white transition-all cursor-pointer focus:outline-none flex items-center justify-center"
                 >
                   <svg className="w-3.5 h-3.5 text-obsidian-text-muted hover:text-purple-400 transition-colors" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
@@ -224,7 +229,7 @@ export default function AmbientGrid({
                   setEditingAccount(account);
                 }}
                 title="Edit Mailbox"
-                className="opacity-0 group-hover:opacity-100 p-1 rounded bg-obsidian border border-obsidian-border hover:border-purple-500/30 hover:bg-purple-500/10 text-obsidian-text-muted hover:text-white transition-all cursor-pointer focus:outline-none flex items-center justify-center"
+                className="opacity-0 group-hover:opacity-100 p-1 rounded bg-obsidian border border-obsidian-border/40 hover:border-purple-500/30 hover:bg-purple-500/10 text-obsidian-text-muted hover:text-white transition-all cursor-pointer focus:outline-none flex items-center justify-center"
               >
                 <svg className="w-3.5 h-3.5 text-obsidian-text-muted hover:text-purple-400 transition-colors" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
@@ -232,13 +237,13 @@ export default function AmbientGrid({
               </button>
 
               {/* Shortcut Badge */}
-              <span className="bg-obsidian border border-obsidian-border text-[10px] font-bold text-obsidian-text-muted px-2 py-0.5 rounded-md group-hover:border-purple-500/30 group-hover:text-purple-400 transition-colors flex items-center justify-center h-[24px]">
+              <span className="bg-obsidian border border-obsidian-border/40 text-[10px] font-bold text-obsidian-text-muted px-2 py-0.5 rounded-md group-hover:border-purple-500/30 group-hover:text-purple-400 transition-colors flex items-center justify-center h-[24px]">
                 {index + 1}
               </span>
             </div>
 
             {/* Platform Icon */}
-            <div className="p-3 bg-obsidian rounded-xl border border-obsidian-border group-hover:border-purple-500/20 transition-colors w-fit">
+            <div className="p-3 bg-obsidian rounded-xl border border-obsidian-border/40 group-hover:border-obsidian-border transition-colors w-fit">
               {renderIcon(account)}
             </div>
 
@@ -257,9 +262,9 @@ export default function AmbientGrid({
         {/* Add Account Card */}
         <button
           onClick={() => setShowAddModal(true)}
-          className="group relative bg-obsidian-canvas border-2 border-dashed border-obsidian-border hover:border-purple-500/40 rounded-2xl p-6 transition-all duration-300 cursor-pointer flex flex-col items-center justify-center h-48 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+          className="group relative bg-obsidian-canvas border-2 border-dashed border-obsidian-border/40 hover:border-obsidian-border hover:border-purple-500/40 rounded-2xl p-6 transition-all duration-300 cursor-pointer flex flex-col items-center justify-center h-48 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
         >
-          <div className="p-3 bg-obsidian rounded-full border border-obsidian-border group-hover:border-purple-500/20 transition-colors mb-3">
+          <div className="p-3 bg-obsidian rounded-full border border-obsidian-border/40 group-hover:border-obsidian-border transition-colors mb-3">
             <svg className="w-6 h-6 text-obsidian-text-muted group-hover:text-purple-400 transition-colors" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
@@ -357,7 +362,7 @@ export default function AmbientGrid({
                   )}
 
                   <label className="flex-1 cursor-pointer">
-                    <span className="block w-full py-2.5 px-3 bg-obsidian border border-obsidian-border hover:border-purple-500/40 text-center rounded-xl text-xs font-bold text-obsidian-text-muted hover:text-white transition-all">
+                    <span className="block w-full py-2.5 px-3 bg-obsidian border border-obsidian-border focus:border-purple-500/50 text-center rounded-xl text-xs font-bold text-obsidian-text-muted hover:text-white transition-all">
                       Choose Custom Logo Image
                     </span>
                     <input
@@ -466,7 +471,7 @@ export default function AmbientGrid({
                   )}
 
                   <label className="flex-1 cursor-pointer">
-                    <span className="block w-full py-2.5 px-3 bg-obsidian border border-obsidian-border hover:border-purple-500/40 text-center rounded-xl text-xs font-bold text-obsidian-text-muted hover:text-white transition-all">
+                    <span className="block w-full py-2.5 px-3 bg-obsidian border border-obsidian-border focus:border-purple-500/50 text-center rounded-xl text-xs font-bold text-obsidian-text-muted hover:text-white transition-all">
                       Choose Custom Logo Image
                     </span>
                     <input
