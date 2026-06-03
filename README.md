@@ -2,6 +2,8 @@
   <img src="public/AppLogo.png" alt="Obsidian Mail Logo" width="120" height="120" style="border-radius: 24px; filter: drop-shadow(0px 4px 20px rgba(168, 85, 247, 0.25));" />
 
   # Obsidian Mail
+  <img width="1527" height="918" alt="Screenshot 2026-06-03 190525" src="https://github.com/user-attachments/assets/782f6c80-bd9a-432b-9945-a452d3c221f6" />
+
 
   ### *A Sleek, Multi-Session Desktop Email Launcher with True Session Isolation*
 
