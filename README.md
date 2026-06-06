@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/AppLogo.png" alt="Obsidian Mail Logo" width="120" height="120" style="border-radius: 24px; filter: drop-shadow(0px 4px 20px rgba(168, 85, 247, 0.25));" />
+  <img src="public/app-icon.png" alt="Obsidian Mail Logo" width="120" height="120" style="border-radius: 24px; filter: drop-shadow(0px 4px 20px rgba(168, 85, 247, 0.25));" />
 
   # Obsidian Mail
   <img width="1527" height="918" alt="Screenshot 2026-06-03 190525" src="https://github.com/user-attachments/assets/782f6c80-bd9a-432b-9945-a452d3c221f6" />
@@ -24,17 +24,24 @@
 
 * 🔒 **True Cookie & Cache Isolation**  
   Each mailbox operates inside its own programmatically isolated system partition (`app_data_dir/sessions/account_[id]`). Log in to multiple work and personal accounts simultaneously without session pollution.
-* 🖱️ **Minimalist Launcher Grid**  
-  A clean dashboard showing all your mailboxes. Hover cards automatically highlight, and standard right-click triggers a custom context menu for full management.
-* ⚡ **Shortcut-Driven Interface**  
+* 👤 **Workspace Profiles**  
+  Organize accounts under distinct workspace profiles (e.g., Work, Personal, Clients). Switch between profiles instantly with a single click.
+* ⚡ **Launch Workspace**  
+  Pre-load and warm up all mailbox sessions within a profile simultaneously from the profile right-click menu, making transitions instant.
+* 🔍 **Quick Command Palette (Ctrl+K)**  
+  Search and navigate your entire catalog of mailboxes instantly by name or URL. Access it via `Ctrl+K` or the Search icon in the header. Shows service brand icons (Gmail, Outlook, iCloud) dynamically.
+* 🧠 **Background Memory & Cache Controls**  
+  - View running background mailboxes marked by a **glowing green status dot**.
+  - Terminate individual background instances or clear their cache folder via the right-click menu.
+  - Global dashboard settings to "Close All Instances" or clear all cache folders.
+* 🖥️ **Desktop Close Integration (Minimize to Tray)**  
+  Toggle "Minimize to System Tray" in Settings to run the app silently in the background on close, maintaining connection sessions.
+* 🖱️ **Borderless & Ultra-Minimalist Grid**  
+  Flat cards with high-contrast active states. Deleted borders entirely to keep the dashboard flat, clean, and modern.
+* ⌨️ **Shortcut-Driven Interface**  
   - Press `1` through `8` on the launcher to open the corresponding mailbox instantly.
   - Press `Escape` or `Ctrl + H` inside any active mailbox session to slide back home to the launcher dashboard.
-* 🛠️ **Account Customization & Reordering**  
-  Create custom mailboxes, edit names and service URLs, and rearrange the launcher order using simple click-and-drag-free buttons. Custom icons can be uploaded directly as Base64 Data URLs and saved in local storage.
-* 🎨 **Obsidian Charcoal Theme**  
-  An immersive dark layout tailored to obsidian aesthetics (`#0b0b0c`, `#111112`). Renders thin custom-themed scrollbars and micro-animations for high-end visual feedback.
-* 📍 **Flat HUD Navigation Dock**  
-  An auto-hiding dock at the bottom of the screen containing a home button and platform switchers, marked by a minimal horizontal glowing purple indicator underneath the active account.
+  - Press `Ctrl + K` to open the search command palette.
 
 ---
 
@@ -50,8 +57,8 @@ graph TD
   D -.->|Escape / Ctrl+H Key Listeners| B
 ```
 
-* **Frontend (React 19, Tailwind v4, Bun)**: Manages local accounts storage, launcher dashboard menus, custom Base64 icon uploads, coordinates dock events, and listens to keyboard shortcuts.
-* **Backend (Tauri v2, Rust)**: Exposes Tauri IPC commands to programmatically spawn, hide, resize, or focus isolated borderless webview windows as child webviews of the main application. Injects keyboard listeners into third-party domains to bubble key commands out to the main container.
+* **Frontend (React 19, Tailwind v4, Bun)**: Manages local profiles/accounts storage, launcher search palettes, Base64 icon uploads, coordinates dock events, and listens to keyboard shortcuts.
+* **Backend (Tauri v2, Rust)**: Exposes Tauri IPC commands to programmatically spawn, hide, resize, focus, or close isolated borderless webview windows as child webviews. Injects keyboard listeners into third-party domains to bubble key commands out to the main container.
 
 ---
 
@@ -93,7 +100,9 @@ graph TD
 | Shortcut Key | Action | Location |
 |---|---|---|
 | `1` - `8` | Open mailbox profile at index | Launcher Dashboard |
-| Right-click Card | Open context menu (Edit settings, Move, Delete) | Launcher Dashboard |
+| `Ctrl + K` | Open Quick Search / Command Palette | Launcher Dashboard |
+| Right-click Card | Open context menu (Edit settings, Close instance, Clear Cache, Delete) | Launcher Dashboard |
+| Right-click Profile Tab | Open profile menu (Rename profile, Launch Workspace, Delete) | Launcher Dashboard |
 | `Escape` | Return to Launcher | Active Webview Session |
 | `Ctrl + H` | Return to Launcher | Active Webview Session |
 

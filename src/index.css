@@ -1,20 +1,36 @@
-@import "tailwindcss"; /* This is how Tailwind v4 is imported now! */
+@import "tailwindcss";
 
-@theme {
-  /* Defining your custom Obsidian Industrial palette natively */
+:root {
   --color-obsidian: #0b0b0c;
   --color-obsidian-canvas: #111112;
   --color-obsidian-border: #222224;
   --color-obsidian-text-muted: #8a8a93;
+  --text-color: #f3f4f6;
+}
+
+:root.light {
+  --color-obsidian: #f3f4f6;
+  --color-obsidian-canvas: #ffffff;
+  --color-obsidian-border: #e5e7eb;
+  --color-obsidian-text-muted: #6b7280;
+  --text-color: #111827;
+}
+
+@theme {
+  --color-obsidian: var(--color-obsidian);
+  --color-obsidian-canvas: var(--color-obsidian-canvas);
+  --color-obsidian-border: var(--color-obsidian-border);
+  --color-obsidian-text-muted: var(--color-obsidian-text-muted);
 }
 
 body {
   margin: 0;
   background-color: var(--color-obsidian);
-  color: #f3f4f6;
+  color: var(--text-color);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   overflow: hidden;
   user-select: none;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 @keyframes fadeIn {
@@ -65,5 +81,3 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #333336;
 }
-
-

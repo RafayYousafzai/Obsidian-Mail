@@ -6,6 +6,7 @@ interface HoverDockProps {
   activeAccountId: string;
   onSelectAccount: (id: string) => void;
   onGoHome: () => void;
+  onSearchClick?: () => void;
 }
 
 export default function HoverDock({
@@ -13,6 +14,7 @@ export default function HoverDock({
   activeAccountId,
   onSelectAccount,
   onGoHome,
+  onSearchClick,
 }: HoverDockProps) {
   const [iconErrors, setIconErrors] = useState<Record<string, boolean>>({});
 
@@ -79,6 +81,17 @@ export default function HoverDock({
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+          </svg>
+        </button>
+
+        {/* Dock Search Button */}
+        <button
+          onClick={onSearchClick}
+          title="Quick Search (Ctrl+K)"
+          className="p-2.5 rounded-full bg-obsidian border border-obsidian-border/40 text-obsidian-text-muted hover:text-white hover:border-purple-500/40 hover:bg-purple-500/10 transition-all cursor-pointer focus:outline-none flex items-center justify-center"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </button>
 

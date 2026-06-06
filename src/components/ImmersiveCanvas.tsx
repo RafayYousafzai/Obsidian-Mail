@@ -20,6 +20,7 @@ export default function ImmersiveCanvas({ activeAccountId, accounts }: Immersive
         await invoke("open_isolated_webview", {
           accountId: activeAccount.id,
           url: activeAccount.url,
+          preload: false,
         });
       } catch (err) {
         console.error("Error opening webview:", err);
