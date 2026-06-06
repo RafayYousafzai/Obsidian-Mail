@@ -21,6 +21,7 @@
   --color-obsidian-canvas: var(--color-obsidian-canvas);
   --color-obsidian-border: var(--color-obsidian-border);
   --color-obsidian-text-muted: var(--color-obsidian-text-muted);
+  --color-obsidian-text-primary: var(--text-color);
 }
 
 body {

@@ -433,7 +433,7 @@ export default function AmbientGrid({
       {/* Account Info */}
       <div>
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-lg font-bold text-white transition-colors truncate">
+          <h2 className="text-lg font-bold text-obsidian-text-primary transition-colors truncate">
             {account.name}
           </h2>
         </div>
@@ -451,7 +451,7 @@ export default function AmbientGrid({
         {/* Responsive Header: Obsidian Mail Title & Profiles Tab Switcher & Settings */}
         <div className="flex flex-col md:flex-row md:items-center justify-between max-w-4xl w-full mb-8 gap-4">
           <div className="flex flex-col text-left">
-            <h1 className="text-3xl font-extrabold tracking-wider bg-gradient-to-r from-white via-gray-300 to-obsidian-text-muted bg-clip-text text-transparent uppercase truncate">
+            <h1 className="text-3xl font-extrabold tracking-wider bg-gradient-to-r from-obsidian-text-primary via-purple-600/80 to-obsidian-text-muted bg-clip-text text-transparent uppercase truncate">
               Obsidian Mail
             </h1>
             <p className="text-[10px] text-obsidian-text-muted tracking-widest uppercase mt-1">
@@ -470,7 +470,7 @@ export default function AmbientGrid({
                   className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                     currentProfileId === p.id
                       ? "bg-purple-600 text-white shadow-lg shadow-purple-600/10"
-                      : "text-obsidian-text-muted hover:text-white"
+                      : "text-obsidian-text-muted hover:text-obsidian-text-primary"
                   }`}
                 >
                   {p.name}
@@ -521,7 +521,7 @@ export default function AmbientGrid({
                 <button
                   key={acc.id}
                   onClick={() => onSelectAccount(acc.id)}
-                  className="px-2.5 py-1 bg-obsidian hover:bg-purple-500/10 rounded-lg text-white font-medium cursor-pointer transition-all hover:text-purple-300 flex items-center gap-1.5 active:scale-95"
+                  className="px-2.5 py-1 bg-obsidian hover:bg-purple-500/10 rounded-lg text-obsidian-text-primary font-medium cursor-pointer transition-all hover:text-purple-300 flex items-center gap-1.5 active:scale-95"
                 >
                   <div className="w-3.5 h-3.5 flex items-center justify-center">
                     {acc.iconUrl && !iconErrors[acc.id] ? (
@@ -569,13 +569,13 @@ export default function AmbientGrid({
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
           <div className="w-full max-w-md bg-obsidian-canvas rounded-2xl p-8 shadow-2xl flex flex-col space-y-6">
             <div className="flex justify-between items-center">
-              <h3 className="text-xl font-bold text-white">Add Isolated Account</h3>
+              <h3 className="text-xl font-bold text-obsidian-text-primary">Add Isolated Account</h3>
               <button
                 onClick={() => {
                   setShowAddModal(false);
                   setNewIconUrl(undefined);
                 }}
-                className="text-obsidian-text-muted hover:text-white transition-colors cursor-pointer"
+                className="text-obsidian-text-muted hover:text-obsidian-text-primary transition-colors cursor-pointer"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -587,12 +587,12 @@ export default function AmbientGrid({
               {/* Account Name */}
               <div className="space-y-1">
                 <label className="text-xs font-bold uppercase text-obsidian-text-muted">Account Name</label>
-                <input
+                 <input
                   type="text"
                   placeholder="e.g., Personal Outlook"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  className="w-full bg-obsidian focus:bg-obsidian/85 rounded-xl px-4 py-2.5 text-sm text-white placeholder-obsidian-text-muted outline-none transition-colors"
+                  className="w-full bg-obsidian focus:bg-obsidian/85 rounded-xl px-4 py-2.5 text-sm text-obsidian-text-primary placeholder-obsidian-text-muted outline-none transition-colors"
                   required
                 />
               </div>
@@ -603,7 +603,7 @@ export default function AmbientGrid({
                 <select
                   value={newType}
                   onChange={(e) => setNewType(e.target.value as any)}
-                  className="w-full bg-obsidian focus:bg-obsidian/85 rounded-xl px-4 py-2.5 text-sm text-white outline-none transition-colors cursor-pointer"
+                  className="w-full bg-obsidian focus:bg-obsidian/85 rounded-xl px-4 py-2.5 text-sm text-obsidian-text-primary outline-none transition-colors cursor-pointer"
                 >
                   <option value="gmail">Gmail</option>
                   <option value="outlook">Outlook</option>
@@ -619,7 +619,7 @@ export default function AmbientGrid({
                   placeholder="https://..."
                   value={newUrl}
                   onChange={(e) => setNewUrl(e.target.value)}
-                  className="w-full bg-obsidian focus:bg-obsidian/85 rounded-xl px-4 py-2.5 text-sm text-white placeholder-obsidian-text-muted outline-none transition-colors"
+                  className="w-full bg-obsidian focus:bg-obsidian/85 rounded-xl px-4 py-2.5 text-sm text-obsidian-text-primary placeholder-obsidian-text-muted outline-none transition-colors"
                   required
                 />
               </div>
@@ -683,10 +683,10 @@ export default function AmbientGrid({
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
           <div className="w-full max-w-md bg-obsidian-canvas rounded-2xl p-8 shadow-2xl flex flex-col space-y-6">
             <div className="flex justify-between items-center">
-              <h3 className="text-xl font-bold text-white">Edit Mailbox Settings</h3>
+              <h3 className="text-xl font-bold text-obsidian-text-primary">Edit Mailbox Settings</h3>
               <button
                 onClick={() => setEditingAccount(null)}
-                className="text-obsidian-text-muted hover:text-white transition-colors cursor-pointer"
+                className="text-obsidian-text-muted hover:text-obsidian-text-primary transition-colors cursor-pointer"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -698,12 +698,12 @@ export default function AmbientGrid({
               {/* Account Name */}
               <div className="space-y-1">
                 <label className="text-xs font-bold uppercase text-obsidian-text-muted">Account Name</label>
-                <input
+                 <input
                   type="text"
                   placeholder="e.g., Personal Outlook"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full bg-obsidian focus:bg-obsidian/85 rounded-xl px-4 py-2.5 text-sm text-white placeholder-obsidian-text-muted outline-none transition-colors"
+                  className="w-full bg-obsidian focus:bg-obsidian/85 rounded-xl px-4 py-2.5 text-sm text-obsidian-text-primary placeholder-obsidian-text-muted outline-none transition-colors"
                   required
                 />
               </div>
@@ -714,7 +714,7 @@ export default function AmbientGrid({
                 <select
                   value={editType}
                   onChange={(e) => setEditType(e.target.value as any)}
-                  className="w-full bg-obsidian focus:bg-obsidian/85 rounded-xl px-4 py-2.5 text-sm text-white outline-none transition-colors cursor-pointer"
+                  className="w-full bg-obsidian focus:bg-obsidian/85 rounded-xl px-4 py-2.5 text-sm text-obsidian-text-primary outline-none transition-colors cursor-pointer"
                 >
                   <option value="gmail">Gmail</option>
                   <option value="outlook">Outlook</option>
@@ -730,7 +730,7 @@ export default function AmbientGrid({
                   placeholder="https://..."
                   value={editUrl}
                   onChange={(e) => setEditUrl(e.target.value)}
-                  className="w-full bg-obsidian focus:bg-obsidian/85 rounded-xl px-4 py-2.5 text-sm text-white placeholder-obsidian-text-muted outline-none transition-colors"
+                  className="w-full bg-obsidian focus:bg-obsidian/85 rounded-xl px-4 py-2.5 text-sm text-obsidian-text-primary placeholder-obsidian-text-muted outline-none transition-colors"
                   required
                 />
               </div>
@@ -811,7 +811,7 @@ export default function AmbientGrid({
               onTogglePinAccount(contextMenu.account.id);
               setContextMenu(null);
             }}
-            className="w-full text-left px-4 py-2 text-xs font-semibold text-white hover:bg-purple-500/10 hover:text-purple-300 transition-colors flex items-center gap-2.5 cursor-pointer"
+            className="w-full text-left px-4 py-2 text-xs font-semibold text-obsidian-text-primary hover:bg-purple-500/10 hover:text-purple-300 transition-colors flex items-center gap-2.5 cursor-pointer"
           >
             <svg className="w-4 h-4 text-obsidian-text-muted fill-current" viewBox="0 0 24 24">
               <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
@@ -828,7 +828,7 @@ export default function AmbientGrid({
                 onReorderAccounts(contextMenu.account.id, "left");
                 setContextMenu(null);
               }}
-              className="w-full text-left px-4 py-2 text-xs font-semibold text-white hover:bg-purple-500/10 hover:text-purple-300 transition-colors flex items-center gap-2.5 cursor-pointer"
+              className="w-full text-left px-4 py-2 text-xs font-semibold text-obsidian-text-primary hover:bg-purple-500/10 hover:text-purple-300 transition-colors flex items-center gap-2.5 cursor-pointer"
             >
               <svg className="w-4 h-4 text-obsidian-text-muted" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -844,7 +844,7 @@ export default function AmbientGrid({
                 onReorderAccounts(contextMenu.account.id, "right");
                 setContextMenu(null);
               }}
-              className="w-full text-left px-4 py-2 text-xs font-semibold text-white hover:bg-purple-500/10 hover:text-purple-300 transition-colors flex items-center gap-2.5 cursor-pointer"
+              className="w-full text-left px-4 py-2 text-xs font-semibold text-obsidian-text-primary hover:bg-purple-500/10 hover:text-purple-300 transition-colors flex items-center gap-2.5 cursor-pointer"
             >
               <svg className="w-4 h-4 text-obsidian-text-muted" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
@@ -861,7 +861,7 @@ export default function AmbientGrid({
               setEditingAccount(contextMenu.account);
               setContextMenu(null);
             }}
-            className="w-full text-left px-4 py-2 text-xs font-semibold text-white hover:bg-purple-500/10 hover:text-purple-300 transition-colors flex items-center gap-2.5 cursor-pointer"
+            className="w-full text-left px-4 py-2 text-xs font-semibold text-obsidian-text-primary hover:bg-purple-500/10 hover:text-purple-300 transition-colors flex items-center gap-2.5 cursor-pointer"
           >
             <svg className="w-4 h-4 text-obsidian-text-muted" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
@@ -942,7 +942,7 @@ export default function AmbientGrid({
                   onLaunchWorkspace();
                   setProfileContextMenu(null);
                 }}
-                className="w-full text-left px-4 py-2 text-xs font-semibold text-white hover:bg-purple-500/10 hover:text-purple-300 transition-colors flex items-center gap-2.5 cursor-pointer"
+                className="w-full text-left px-4 py-2 text-xs font-semibold text-obsidian-text-primary hover:bg-purple-500/10 hover:text-purple-300 transition-colors flex items-center gap-2.5 cursor-pointer"
               >
                 <svg className="w-4 h-4 text-purple-400" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M11 21h-1l1.5-6.5h-5c-.77 0-1.17-.46-1-.9L8 3.5h7L13.5 10h5c.57 0 .86.3.7.83L15 21h-4z" />
@@ -960,7 +960,7 @@ export default function AmbientGrid({
               setRenameProfileName(profileContextMenu.profile.name);
               setProfileContextMenu(null);
             }}
-            className="w-full text-left px-4 py-2 text-xs font-semibold text-white hover:bg-purple-500/10 hover:text-purple-300 transition-colors flex items-center gap-2.5 cursor-pointer"
+            className="w-full text-left px-4 py-2 text-xs font-semibold text-obsidian-text-primary hover:bg-purple-500/10 hover:text-purple-300 transition-colors flex items-center gap-2.5 cursor-pointer"
           >
             <svg className="w-4 h-4 text-obsidian-text-muted" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
@@ -1087,7 +1087,7 @@ export default function AmbientGrid({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleSearchKeyDown}
-                className="w-full bg-transparent py-4 text-sm text-white placeholder-obsidian-text-muted outline-none"
+                className="w-full bg-transparent py-4 text-sm text-obsidian-text-primary placeholder-obsidian-text-muted outline-none"
               />
               <span className="text-[10px] bg-obsidian px-1.5 py-0.5 rounded text-obsidian-text-muted font-bold">
                 ESC
@@ -1113,7 +1113,7 @@ export default function AmbientGrid({
                       }}
                       onMouseEnter={() => setSelectedSearchIdx(idx)}
                       className={`px-4 py-3 cursor-pointer flex items-center justify-between rounded-xl transition-colors ${
-                        isSelected ? "bg-purple-600/20 text-purple-300" : "text-white"
+                        isSelected ? "bg-purple-600/20 text-purple-300" : "text-obsidian-text-primary"
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -1152,7 +1152,7 @@ export default function AmbientGrid({
                   <button
                     onClick={() => setSettingsTab("general")}
                     className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                      settingsTab === "general" ? "bg-purple-600/10 text-purple-400" : "text-obsidian-text-muted hover:text-white"
+                      settingsTab === "general" ? "bg-purple-600/10 text-purple-400" : "text-obsidian-text-muted hover:text-obsidian-text-primary"
                     }`}
                   >
                     General
@@ -1160,7 +1160,7 @@ export default function AmbientGrid({
                   <button
                     onClick={() => setSettingsTab("cache")}
                     className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                      settingsTab === "cache" ? "bg-purple-600/10 text-purple-400" : "text-obsidian-text-muted hover:text-white"
+                      settingsTab === "cache" ? "bg-purple-600/10 text-purple-400" : "text-obsidian-text-muted hover:text-obsidian-text-primary"
                     }`}
                   >
                     Cache Control
@@ -1168,7 +1168,7 @@ export default function AmbientGrid({
                   <button
                     onClick={() => setSettingsTab("about")}
                     className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                      settingsTab === "about" ? "bg-purple-600/10 text-purple-400" : "text-obsidian-text-muted hover:text-white"
+                      settingsTab === "about" ? "bg-purple-600/10 text-purple-400" : "text-obsidian-text-muted hover:text-obsidian-text-primary"
                     }`}
                   >
                     About App
@@ -1178,7 +1178,7 @@ export default function AmbientGrid({
 
               <button
                 onClick={() => setShowSettingsModal(false)}
-                className="w-full py-2 bg-obsidian hover:bg-obsidian-border/30 hover:text-white text-obsidian-text-muted font-bold text-xs rounded-xl cursor-pointer transition-colors"
+                className="w-full py-2 bg-obsidian hover:bg-obsidian-border/30 hover:text-obsidian-text-primary text-obsidian-text-muted font-bold text-xs rounded-xl cursor-pointer transition-colors"
               >
                 Close
               </button>
@@ -1189,7 +1189,7 @@ export default function AmbientGrid({
               <div>
                 {settingsTab === "general" && (
                   <div className="space-y-6">
-                    <h3 className="text-lg font-bold text-white pb-2">General Preferences</h3>
+                    <h3 className="text-lg font-bold text-obsidian-text-primary pb-2">General Preferences</h3>
 
                     {/* Theme Toggle */}
                     <div className="space-y-2">
@@ -1200,7 +1200,7 @@ export default function AmbientGrid({
                           className={`flex-1 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-colors ${
                             theme === "dark"
                               ? "bg-purple-600/20 text-purple-400"
-                              : "bg-obsidian text-obsidian-text-muted hover:text-white"
+                              : "bg-obsidian text-obsidian-text-muted hover:text-obsidian-text-primary"
                           }`}
                         >
                           Charcoal Dark
@@ -1210,7 +1210,7 @@ export default function AmbientGrid({
                           className={`flex-1 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-colors ${
                             theme === "light"
                               ? "bg-purple-600/20 text-purple-400"
-                              : "bg-obsidian text-obsidian-text-muted hover:text-white"
+                              : "bg-obsidian text-obsidian-text-muted hover:text-obsidian-text-primary"
                           }`}
                         >
                           Glass Light
@@ -1221,7 +1221,7 @@ export default function AmbientGrid({
                     {/* Minimize to Tray */}
                     <div className="flex items-center justify-between pt-4">
                       <div className="flex flex-col gap-0.5">
-                        <label className="text-xs font-bold uppercase text-white">Minimize to System Tray</label>
+                        <label className="text-xs font-bold uppercase text-obsidian-text-primary">Minimize to System Tray</label>
                         <span className="text-[10px] text-obsidian-text-muted">Hide application in tray on close requests</span>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
@@ -1239,7 +1239,7 @@ export default function AmbientGrid({
 
                 {settingsTab === "cache" && (
                   <div className="space-y-6">
-                    <h3 className="text-lg font-bold text-white pb-2">Memory & Cache Control</h3>
+                    <h3 className="text-lg font-bold text-obsidian-text-primary pb-2">Memory & Cache Control</h3>
 
                     {/* Active Mailbox Instances (RAM Control) */}
                     <div className="space-y-3">
@@ -1271,7 +1271,7 @@ export default function AmbientGrid({
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                               </span>
-                              <span className="font-semibold text-white">{acc.name}</span>
+                              <span className="font-semibold text-obsidian-text-primary">{acc.name}</span>
                             </div>
                             <button
                               onClick={() => onCloseAccount(acc.id)}
@@ -1322,11 +1322,11 @@ export default function AmbientGrid({
 
                 {settingsTab === "about" && (
                   <div className="space-y-4">
-                    <h3 className="text-lg font-bold text-white pb-2">About Obsidian Mail</h3>
+                    <h3 className="text-lg font-bold text-obsidian-text-primary pb-2">About Obsidian Mail</h3>
                     <div className="flex items-center gap-4 py-2">
                       <img src="/logo.png" alt="Mail App logo" className="w-16 h-16 object-contain" />
                       <div className="flex flex-col">
-                        <span className="text-sm font-bold text-white">Obsidian Mail Desktop</span>
+                        <span className="text-sm font-bold text-obsidian-text-primary">Obsidian Mail Desktop</span>
                         <span className="text-xs text-obsidian-text-muted">Version 0.1.1 (Wix/MSI Bundle)</span>
                         <span className="text-[10px] text-obsidian-text-muted mt-1">© 2026 Developer Workstation</span>
                       </div>
