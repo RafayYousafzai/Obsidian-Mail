@@ -24,19 +24,19 @@ export interface Profile {
 }
 
 const DEFAULT_PROFILES: Profile[] = [
-  { id: "work", name: "Work" },
   { id: "personal", name: "Personal" },
+  { id: "work", name: "Work" },
 ];
 
 const DEFAULT_ACCOUNTS: Account[] = [
   {
-    id: "work-gmail",
-    name: "Work Mail",
+    id: "personal-gmail",
+    name: "Personal Mail",
     type: "gmail",
     url: "https://mail.google.com",
     iconUrl: "/logos/gmail.png",
-    profileId: "work",
-    group: "Business",
+    profileId: "personal",
+    group: "Personal",
     isPinned: true,
     lastAccessed: Date.now(),
   },
@@ -52,12 +52,12 @@ const DEFAULT_ACCOUNTS: Account[] = [
     lastAccessed: Date.now(),
   },
   {
-    id: "icloud-dev",
-    name: "Developer Mail",
+    id: "icloud-personal",
+    name: "iCloud Mail",
     type: "icloud",
     url: "https://www.icloud.com/mail",
-    profileId: "work",
-    group: "Business",
+    profileId: "personal",
+    group: "Personal",
     isPinned: false,
     lastAccessed: Date.now(),
   },
@@ -78,7 +78,7 @@ function App() {
 
   const [currentProfileId, setCurrentProfileId] = useState<string>(() => {
     const saved = localStorage.getItem("obsidian_current_profile_id");
-    return saved || "work";
+    return saved || "personal";
   });
 
   const [accounts, setAccounts] = useState<Account[]>(() => {
