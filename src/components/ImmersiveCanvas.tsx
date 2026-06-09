@@ -52,29 +52,7 @@ export default function ImmersiveCanvas({ activeAccountId, accounts }: Immersive
     };
   }, [activeAccountId, accounts]);
 
-  // Handle window resizing to size the child webview dynamically leaving 70px
-  useEffect(() => {
-    const handleResize = async () => {
-      try {
-        await invoke("resize_isolated_webview", {
-          accountId: activeAccountId,
-          width: window.innerWidth,
-          height: window.innerHeight,
-        });
-      } catch (err) {
-        console.error("Error resizing webview:", err);
-      }
-    };
 
-    window.addEventListener("resize", handleResize);
-    // Initial size setting after a small timeout to let the webview mount
-    const timer = setTimeout(handleResize, 100);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      clearTimeout(timer);
-    };
-  }, [activeAccountId]);
 
   return (
     <div className="absolute inset-x-0 bottom-0 h-[70px] bg-obsidian-canvas border-t border-obsidian-border pointer-events-none z-20" />
