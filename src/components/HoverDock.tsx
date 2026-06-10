@@ -77,7 +77,7 @@ export default function HoverDock({
         <button
           onClick={onGoHome}
           title="Return to Launcher"
-          className="p-2.5 rounded-full bg-obsidian border border-obsidian-border/40 text-obsidian-text-muted hover:text-obsidian-text-primary hover:border-purple-500/40 hover:bg-purple-500/10 transition-all cursor-pointer focus:outline-none flex items-center justify-center"
+          className="p-2.5 rounded-full bg-obsidian border border-obsidian-border/40 text-obsidian-text-muted hover:text-obsidian-text-primary hover:border-blue-500/40 hover:bg-blue-500/10 transition-all cursor-pointer focus:outline-none flex items-center justify-center"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
@@ -88,7 +88,7 @@ export default function HoverDock({
         <button
           onClick={onSearchClick}
           title="Quick Search (Ctrl+K)"
-          className="p-2.5 rounded-full bg-obsidian border border-obsidian-border/40 text-obsidian-text-muted hover:text-obsidian-text-primary hover:border-purple-500/40 hover:bg-purple-500/10 transition-all cursor-pointer focus:outline-none flex items-center justify-center"
+          className="p-2.5 rounded-full bg-obsidian border border-obsidian-border/40 text-obsidian-text-muted hover:text-obsidian-text-primary hover:border-blue-500/40 hover:bg-blue-500/10 transition-all cursor-pointer focus:outline-none flex items-center justify-center"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -109,14 +109,14 @@ export default function HoverDock({
                   title={account.name}
                   className={`p-2.5 rounded-full bg-obsidian border transition-all duration-300 cursor-pointer focus:outline-none flex items-center justify-center ${
                     isActive
-                      ? "border-purple-500/20 text-purple-400 scale-105"
+                      ? "border-blue-500/20 text-blue-400 scale-105"
                       : `border-obsidian-border/40 ${getBrandColor(account.type)}`
                   }`}
                 >
                   {renderIcon(account)}
                 </button>
                 {isActive && (
-                  <span className="absolute -bottom-1.5 w-6 h-[3px] bg-purple-500 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.8)] animate-pulse" />
+                  <span className="absolute -bottom-1.5 w-6 h-[3px] bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.8)] animate-pulse" />
                 )}
               </div>
             );
