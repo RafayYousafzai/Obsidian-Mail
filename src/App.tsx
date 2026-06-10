@@ -6,6 +6,8 @@ import AmbientGrid from "./components/AmbientGrid";
 import ImmersiveCanvas from "./components/ImmersiveCanvas";
 import HoverDock from "./components/HoverDock";
 
+const isLinux = typeof window !== "undefined" && navigator.userAgent.toLowerCase().includes("linux");
+
 export interface Account {
   id: string;
   name: string;
@@ -169,6 +171,20 @@ function App() {
     );
   }, [minimizeToTray]);
 
+  // Sync accounts to GTK HeaderBar on Linux
+  useEffect(() => {
+    if (isLinux) {
+      const headerBarAccounts = activeAccounts.map((acc) => ({
+        id: acc.id,
+        name: acc.name,
+        active: acc.id === activeAccountId,
+      }));
+      invoke("sync_accounts_to_headerbar", { accounts: headerBarAccounts }).catch((err) =>
+        console.error("Failed to sync headerbar accounts:", err)
+      );
+    }
+  }, [accounts, activeAccountId, currentProfileId]);
+
   // Hidden-Until-Ready loading strategy to prevent rendering flashes/blinks
   useEffect(() => {
     // Allow light/dark canvas painting tasks to complete inside macro-task queue
@@ -215,9 +231,15 @@ function App() {
       }
     });
 
+    // Listen to native select-account event from GTK HeaderBar
+    const unlistenSelectAccount = listen<string>("select-account", (event) => {
+      handleSelectAccount(event.payload);
+    });
+
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       unlistenPromise.then((unlisten) => unlisten());
+      unlistenSelectAccount.then((unlisten) => unlisten());
     };
   }, [activeAccountId]);
 
@@ -475,16 +497,18 @@ function App() {
             activeAccountId={activeAccountId}
             accounts={accounts}
           />
-          <HoverDock
-            accounts={activeAccounts}
-            activeAccountId={activeAccountId}
-            onSelectAccount={handleSelectAccount}
-            onGoHome={handleReturnHome}
-            onSearchClick={() => {
-              handleReturnHome();
-              setAutoOpenSearch(true);
-            }}
-          />
+          {!isLinux && (
+            <HoverDock
+              accounts={activeAccounts}
+              activeAccountId={activeAccountId}
+              onSelectAccount={handleSelectAccount}
+              onGoHome={handleReturnHome}
+              onSearchClick={() => {
+                handleReturnHome();
+                setAutoOpenSearch(true);
+              }}
+            />
+          )}
         </>
       )}
 

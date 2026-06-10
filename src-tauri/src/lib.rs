@@ -37,15 +37,10 @@ fn update_linux_layout(window: &tauri::Window, active_account_id: Option<&str>) 
                 
                 if let Some(main_widget) = main_webview_widget {
                     if let Some(active_widget) = active_child_widget {
-                        // 1. Configure main webview
-                        main_widget.set_hexpand(true);
-                        main_widget.set_vexpand(false);
-                        main_widget.set_halign(gtk::Align::Fill);
-                        main_widget.set_valign(gtk::Align::Fill);
-                        main_widget.set_size_request(-1, 70);
-                        gtk_box.set_child_packing(&main_widget, false, false, 0, gtk::PackType::Start);
+                        // 1. Hide the main webview (React UI / launcher)
+                        main_widget.set_visible(false);
                         
-                        // 2. Configure active child webview to expand and fill, with 0 minimum height request
+                        // 2. Configure active child webview to expand and fill
                         active_widget.set_hexpand(true);
                         active_widget.set_vexpand(true);
                         active_widget.set_halign(gtk::Align::Fill);
@@ -53,17 +48,39 @@ fn update_linux_layout(window: &tauri::Window, active_account_id: Option<&str>) 
                         active_widget.set_size_request(-1, 0);
                         gtk_box.set_child_packing(&active_widget, true, true, 0, gtk::PackType::Start);
                         
-                        // 3. Reorder: active child webview at index 0, main webview at the end
+                        // 3. Make sure only the active child is visible, hide all other account webviews
+                        for child in &children {
+                            let name = child.widget_name();
+                            if name.as_str() != "main-webview" {
+                                if Some(name.as_str()) == active_name.as_deref() {
+                                    child.set_visible(true);
+                                } else {
+                                    child.set_visible(false);
+                                }
+                            }
+                        }
+                        
+                        // 4. Reorder: active child webview at index 0
                         gtk_box.reorder_child(&active_widget, 0);
-                        gtk_box.reorder_child(&main_widget, (children.len() - 1) as i32);
                     } else {
-                        // Home screen: only main webview should fill
+                        // Home screen: only main webview should fill and be visible
                         main_widget.set_hexpand(true);
                         main_widget.set_vexpand(true);
                         main_widget.set_halign(gtk::Align::Fill);
                         main_widget.set_valign(gtk::Align::Fill);
                         main_widget.set_size_request(-1, -1);
                         gtk_box.set_child_packing(&main_widget, true, true, 0, gtk::PackType::Start);
+                        
+                        main_widget.set_visible(true);
+                        
+                        // Hide all child webviews
+                        for child in &children {
+                            let name = child.widget_name();
+                            if name.as_str() != "main-webview" {
+                                child.set_visible(false);
+                            }
+                        }
+                        
                         gtk_box.reorder_child(&main_widget, 0);
                     }
                 }
@@ -80,6 +97,86 @@ use std::sync::Mutex;
 struct AppState {
     minimize_to_tray: AtomicBool,
     active_account_id: Mutex<Option<String>>,
+}
+
+#[derive(serde::Deserialize)]
+struct HeaderBarAccount {
+    id: String,
+    name: String,
+    active: bool,
+}
+
+#[tauri::command]
+async fn sync_accounts_to_headerbar(app: AppHandle, accounts: Vec<HeaderBarAccount>) -> Result<(), String> {
+    #[cfg(target_os = "linux")]
+    {
+        use gtk::prelude::*;
+        let main_window = app.get_window("main").ok_or("Main window not found")?;
+        
+        let (tx, rx) = tokio::sync::oneshot::channel();
+        let mut tx_opt = Some(tx);
+        let mut accounts_opt = Some(accounts);
+        gtk::glib::idle_add_local(move || {
+            let res = (|| {
+                if let Some(accounts) = accounts_opt.take() {
+                    if let Ok(gtk_window) = main_window.gtk_window() {
+                        if let Some(titlebar) = gtk_window.titlebar() {
+                            if let Some(headerbar) = titlebar.downcast_ref::<gtk::HeaderBar>() {
+                                let mut accounts_box_opt = None;
+                                for child in headerbar.children() {
+                                    if child.widget_name().as_str() == "headerbar-accounts-box" {
+                                        if let Some(bbox) = child.downcast_ref::<gtk::Box>() {
+                                            accounts_box_opt = Some(bbox.clone());
+                                            break;
+                                        }
+                                    }
+                                }
+                                
+                                if let Some(accounts_box) = accounts_box_opt {
+                                    // Clear existing children
+                                    for child in accounts_box.children() {
+                                        accounts_box.remove(&child);
+                                    }
+                                    
+                                    // Add buttons for each account
+                                    for acc in accounts {
+                                        let button = gtk::Button::with_label(&acc.name);
+                                        if acc.active {
+                                            button.style_context().add_class("suggested-action");
+                                        }
+                                        
+                                        let app_handle = app.clone();
+                                        let acc_id = acc.id.clone();
+                                        button.connect_clicked(move |_| {
+                                            let _ = app_handle.emit("select-account", acc_id.clone());
+                                        });
+                                        
+                                        accounts_box.pack_start(&button, false, false, 0);
+                                    }
+                                    accounts_box.show_all();
+                                }
+                            }
+                        }
+                    }
+                }
+                Ok::<(), String>(())
+            })();
+            if let Some(tx) = tx_opt.take() {
+                let _ = tx.send(res);
+            }
+            gtk::glib::ControlFlow::Break
+        });
+        
+        rx.await.map_err(|e| e.to_string())??
+    }
+    
+    #[cfg(not(target_os = "linux"))]
+    {
+        let _ = app;
+        let _ = accounts;
+    }
+    
+    Ok(())
 }
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -130,7 +227,11 @@ async fn open_isolated_webview(app: AppHandle, account_id: String, url: String, 
             // Set size right before showing to make sure it matches current layout
             let size = main_window.inner_size().unwrap();
             let scale_factor = main_window.scale_factor().unwrap_or(1.0);
-            let gap_size = (70.0 * scale_factor) as u32;
+            let gap_size = if cfg!(target_os = "linux") {
+                0
+            } else {
+                (70.0 * scale_factor) as u32
+            };
             let child_height = if size.height > gap_size { size.height - gap_size } else { size.height };
             let _ = webview.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(size.width, child_height)));
 
@@ -157,7 +258,11 @@ async fn open_isolated_webview(app: AppHandle, account_id: String, url: String, 
     let size = main_window.inner_size().unwrap();
     let scale_factor = main_window.scale_factor().unwrap_or(1.0);
     // Default to full window height minus a 70px logical bezel at the bottom
-    let gap_size = (70.0 * scale_factor) as u32;
+    let gap_size = if cfg!(target_os = "linux") {
+        0
+    } else {
+        (70.0 * scale_factor) as u32
+    };
     let child_height = if size.height > gap_size { size.height - gap_size } else { size.height };
 
     let child = match main_window.add_child(
@@ -206,7 +311,11 @@ async fn open_isolated_webview(app: AppHandle, account_id: String, url: String, 
             // Set size right before showing to enforce GtkBox allocation on Linux and layout refresh
             let size = main_window_clone.inner_size().unwrap();
             let scale_factor = main_window_clone.scale_factor().unwrap_or(1.0);
-            let gap_size = (70.0 * scale_factor) as u32;
+            let gap_size = if cfg!(target_os = "linux") {
+                0
+            } else {
+                (70.0 * scale_factor) as u32
+            };
             let child_height = if size.height > gap_size { size.height - gap_size } else { size.height };
             let _ = child_clone.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(size.width, child_height)));
 
@@ -275,7 +384,11 @@ async fn resize_isolated_webview(app: AppHandle, account_id: String, width: u32,
         let physical_width = (width as f64 * scale_factor) as u32;
         let physical_height = (height as f64 * scale_factor) as u32;
         
-        let physical_gap = (70.0 * scale_factor) as u32;
+        let physical_gap = if cfg!(target_os = "linux") {
+            0
+        } else {
+            (70.0 * scale_factor) as u32
+        };
         let child_height = if physical_height > physical_gap { physical_height - physical_gap } else { physical_height };
 
         let _ = webview.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(physical_width, child_height)));
@@ -301,6 +414,74 @@ pub fn run() {
                 use gtk::prelude::*;
                 let window = app.get_window("main").unwrap();
                 if let Ok(gtk_window) = window.gtk_window() {
+                    // Create GTK HeaderBar
+                    let header_bar = gtk::HeaderBar::new();
+                    header_bar.set_show_close_button(true);
+                    // Create custom title label wrapped in EventBox
+                    let event_box = gtk::EventBox::new();
+                    event_box.set_visible_window(false);
+                    let title_label = gtk::Label::new(Some("Obsidian Mail"));
+                    title_label.style_context().add_class("title");
+                    event_box.add(&title_label);
+                    header_bar.set_custom_title(Some(&event_box));
+
+                    let gtk_window_clone_eb = gtk_window.clone();
+                    event_box.connect_button_press_event(move |_, event| {
+                        println!("[Title EventBox] Mouse button press event: button={}", event.button());
+                        if event.button() == 1 {
+                            if let Some((root_x, root_y)) = event.root_coords() {
+                                println!("[Title EventBox] Initiating native drag-and-move at ({}, {})", root_x, root_y);
+                                gtk_window_clone_eb.begin_move_drag(
+                                    event.button() as i32,
+                                    root_x as i32,
+                                    root_y as i32,
+                                    event.time(),
+                                );
+                                return gtk::glib::Propagation::Stop;
+                            }
+                        }
+                        gtk::glib::Propagation::Proceed
+                    });
+
+                    // Create Home Button
+                    let home_button = gtk::Button::new();
+                    let home_image = gtk::Image::from_icon_name(Some("go-home"), gtk::IconSize::Button);
+                    home_button.set_image(Some(&home_image));
+                    home_button.set_always_show_image(true);
+                    home_button.set_tooltip_text(Some("Home"));
+
+                    let app_handle = app.handle().clone();
+                    home_button.connect_clicked(move |_| {
+                        let _ = app_handle.emit("go-home", None::<String>);
+                    });
+                    header_bar.pack_start(&home_button);
+
+                    // Create a container for account shortcuts
+                    let accounts_box = gtk::Box::new(gtk::Orientation::Horizontal, 6);
+                    accounts_box.set_widget_name("headerbar-accounts-box");
+                    header_bar.pack_start(&accounts_box);
+
+                    gtk_window.set_titlebar(Some(&header_bar));
+                    header_bar.show_all();
+
+                    let gtk_window_clone = gtk_window.clone();
+                    header_bar.connect_button_press_event(move |_, event| {
+                        println!("[HeaderBar] Mouse button press event: button={}", event.button());
+                        if event.button() == 1 {
+                            if let Some((root_x, root_y)) = event.root_coords() {
+                                println!("[HeaderBar] Initiating native drag-and-move at ({}, {})", root_x, root_y);
+                                gtk_window_clone.begin_move_drag(
+                                    event.button() as i32,
+                                    root_x as i32,
+                                    root_y as i32,
+                                    event.time(),
+                                );
+                                return gtk::glib::Propagation::Stop;
+                            }
+                        }
+                        gtk::glib::Propagation::Proceed
+                    });
+
                     if let Some(container) = gtk_window.child() {
                         if let Some(gtk_box) = container.downcast_ref::<gtk::Box>() {
                             if let Some(main_webview) = gtk_box.children().first() {
@@ -405,7 +586,8 @@ pub fn run() {
             hide_isolated_webview,
             close_isolated_webview,
             resize_isolated_webview,
-            go_home_command
+            go_home_command,
+            sync_accounts_to_headerbar
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

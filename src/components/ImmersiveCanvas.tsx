@@ -7,6 +7,8 @@ interface ImmersiveCanvasProps {
   accounts: Account[];
 }
 
+const isLinux = typeof window !== "undefined" && navigator.userAgent.toLowerCase().includes("linux");
+
 export default function ImmersiveCanvas({ activeAccountId, accounts }: ImmersiveCanvasProps) {
   const previousAccountIdRef = useRef<string | null>(null);
 
@@ -53,6 +55,8 @@ export default function ImmersiveCanvas({ activeAccountId, accounts }: Immersive
   }, [activeAccountId, accounts]);
 
 
+
+  if (isLinux) return null;
 
   return (
     <div className="absolute inset-x-0 bottom-0 h-[70px] bg-obsidian-canvas border-t border-obsidian-border pointer-events-none z-20" />
