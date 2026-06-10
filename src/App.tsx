@@ -35,7 +35,7 @@ const DEFAULT_ACCOUNTS: Account[] = [
     id: "personal-gmail",
     name: "Personal Mail",
     type: "gmail",
-    url: "https://mail.google.com",
+    url: "https://accounts.google.com/v3/signin/identifier?continue=https%3A%2F%2Fmail.google.com%2Fmail%2F%3Fservice%3Dmail%26flowName%3DGlifWebSignIn%26flowEntry%3DAccountChooser%26ec%3Dasw-gmail-globalnav-signin&dsh=S1443926869%3A1781072673340019&uj=gafb-gmail_asw-globalnav-en&flowName=GlifWebSignIn&flowEntry=ServiceLogin&ifkv=AcDsRvzV9_uNUKLN_kBum_UlXLNWgwyzhxHAXQpouzbHLFKmp8417tYngPo6Zgan3w7NBXTh4TMEuQ",
     iconUrl: "/logos/gmail.png",
     profileId: "personal",
     group: "Personal",
@@ -46,7 +46,7 @@ const DEFAULT_ACCOUNTS: Account[] = [
     id: "personal-outlook",
     name: "Personal Outlook",
     type: "outlook",
-    url: "https://outlook.live.com",
+    url: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=9199bf20-a13f-4107-85dc-02114787ef48&scope=https%3A%2F%2Foutlook.office.com%2F.default%20openid%20profile%20offline_access&redirect_uri=https%3A%2F%2Foutlook.live.com%2Fmail%2F&client-request-id=ab3d3ad4-3b36-9834-31c8-db7bf0f13e2c&response_mode=fragment&client_info=1&clidata=1&prompt=select_account&nonce=019eb035-0c7d-7586-b99b-639b400c7e01&state=eyJpZCI6IjAxOWViMDM1LTBjN2MtNzIzMi04ZDg5LWU0MTE4NWIyZDcwYSIsIm1ldGEiOnsiaW50ZXJhY3Rpb25UeXBlIjoicmVkaXJlY3QifX0%3D%7CaHR0cHM6Ly9vdXRsb29rLmxpdmUuY29tL21haWwvP2N1bHR1cmU9ZW4tdXMmY291bnRyeT11cw&claims=%7B%22access_token%22%3A%7B%22xms_cc%22%3A%7B%22values%22%3A%5B%22CP1%22%5D%7D%7D%7D&x-client-SKU=msal.js.browser&x-client-VER=5.8.0&response_type=code&code_challenge=FMIpsFCznKWLR-r8NaS2UbwnpVhF8IXvkpjpFS-LCDA&code_challenge_method=S256&cobrandid=ab0455a0-8d03-46b9-b18b-df2f57b9e44c&fl=dob%2Cflname%2Cwld",
     iconUrl: "/logos/outlook.png",
     profileId: "personal",
     group: "Personal",
@@ -57,7 +57,7 @@ const DEFAULT_ACCOUNTS: Account[] = [
     id: "icloud-personal",
     name: "iCloud Mail",
     type: "icloud",
-    url: "https://www.icloud.com/mail",
+    url: "https://www.icloud.com/",
     profileId: "personal",
     group: "Personal",
     isPinned: false,
@@ -85,14 +85,37 @@ function App() {
 
   const [accounts, setAccounts] = useState<Account[]>(() => {
     const saved = localStorage.getItem("obsidian_accounts");
+    let initialAccounts = DEFAULT_ACCOUNTS;
     if (saved) {
       try {
-        return JSON.parse(saved);
+        initialAccounts = JSON.parse(saved);
       } catch (err) {
         console.error("Failed to parse saved accounts:", err);
       }
     }
-    return DEFAULT_ACCOUNTS;
+    
+    // Migrate old URLs to the new direct-sign-in ones
+    return initialAccounts.map((acc) => {
+      if (acc.url === "https://mail.google.com") {
+        return {
+          ...acc,
+          url: "https://accounts.google.com/v3/signin/identifier?continue=https%3A%2F%2Fmail.google.com%2Fmail%2F%3Fservice%3Dmail%26flowName%3DGlifWebSignIn%26flowEntry%3DAccountChooser%26ec%3Dasw-gmail-globalnav-signin&dsh=S1443926869%3A1781072673340019&uj=gafb-gmail_asw-globalnav-en&flowName=GlifWebSignIn&flowEntry=ServiceLogin&ifkv=AcDsRvzV9_uNUKLN_kBum_UlXLNWgwyzhxHAXQpouzbHLFKmp8417tYngPo6Zgan3w7NBXTh4TMEuQ"
+        };
+      }
+      if (acc.url === "https://outlook.live.com") {
+        return {
+          ...acc,
+          url: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=9199bf20-a13f-4107-85dc-02114787ef48&scope=https%3A%2F%2Foutlook.office.com%2F.default%20openid%20profile%20offline_access&redirect_uri=https%3A%2F%2Foutlook.live.com%2Fmail%2F&client-request-id=ab3d3ad4-3b36-9834-31c8-db7bf0f13e2c&response_mode=fragment&client_info=1&clidata=1&prompt=select_account&nonce=019eb035-0c7d-7586-b99b-639b400c7e01&state=eyJpZCI6IjAxOWViMDM1LTBjN2MtNzIzMi04ZDg5LWU0MTE4NWIyZDcwYSIsIm1ldGEiOnsiaW50ZXJhY3Rpb25UeXBlIjoicmVkaXJlY3QifX0%3D%7CaHR0cHM6Ly9vdXRsb29rLmxpdmUuY29tL21haWwvP2N1bHR1cmU9ZW4tdXMmY291bnRyeT11cw&claims=%7B%22access_token%22%3A%7B%22xms_cc%22%3A%7B%22values%22%3A%5B%22CP1%22%5D%7D%7D%7D&x-client-SKU=msal.js.browser&x-client-VER=5.8.0&response_type=code&code_challenge=FMIpsFCznKWLR-r8NaS2UbwnpVhF8IXvkpjpFS-LCDA&code_challenge_method=S256&cobrandid=ab0455a0-8d03-46b9-b18b-df2f57b9e44c&fl=dob%2Cflname%2Cwld"
+        };
+      }
+      if (acc.url === "https://www.icloud.com/mail") {
+        return {
+          ...acc,
+          url: "https://www.icloud.com/"
+        };
+      }
+      return acc;
+    });
   });
 
   const [theme, setTheme] = useState<"dark" | "light">(() => {

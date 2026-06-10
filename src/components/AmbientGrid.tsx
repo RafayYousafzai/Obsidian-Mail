@@ -203,9 +203,9 @@ export default function AmbientGrid({
 
   // Automatically update default URL based on type in Add Modal
   useEffect(() => {
-    if (newType === "gmail") setNewUrl("https://mail.google.com");
-    else if (newType === "outlook") setNewUrl("https://outlook.live.com");
-    else if (newType === "icloud") setNewUrl("https://www.icloud.com/mail");
+    if (newType === "gmail") setNewUrl("https://accounts.google.com/v3/signin/identifier?continue=https%3A%2F%2Fmail.google.com%2Fmail%2F%3Fservice%3Dmail%26flowName%3DGlifWebSignIn%26flowEntry%3DAccountChooser%26ec%3Dasw-gmail-globalnav-signin&dsh=S1443926869%3A1781072673340019&uj=gafb-gmail_asw-globalnav-en&flowName=GlifWebSignIn&flowEntry=ServiceLogin&ifkv=AcDsRvzV9_uNUKLN_kBum_UlXLNWgwyzhxHAXQpouzbHLFKmp8417tYngPo6Zgan3w7NBXTh4TMEuQ");
+    else if (newType === "outlook") setNewUrl("https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=9199bf20-a13f-4107-85dc-02114787ef48&scope=https%3A%2F%2Foutlook.office.com%2F.default%20openid%20profile%20offline_access&redirect_uri=https%3A%2F%2Foutlook.live.com%2Fmail%2F&client-request-id=ab3d3ad4-3b36-9834-31c8-db7bf0f13e2c&response_mode=fragment&client_info=1&clidata=1&prompt=select_account&nonce=019eb035-0c7d-7586-b99b-639b400c7e01&state=eyJpZCI6IjAxOWViMDM1LTBjN2MtNzIzMi04ZDg5LWU0MTE4NWIyZDcwYSIsIm1ldGEiOnsiaW50ZXJhY3Rpb25UeXBlIjoicmVkaXJlY3QifX0%3D%7CaHR0cHM6Ly9vdXRsb29rLmxpdmUuY29tL21haWwvP2N1bHR1cmU9ZW4tdXMmY291bnRyeT11cw&claims=%7B%22access_token%22%3A%7B%22xms_cc%22%3A%7B%22values%22%3A%5B%22CP1%22%5D%7D%7D%7D&x-client-SKU=msal.js.browser&x-client-VER=5.8.0&response_type=code&code_challenge=FMIpsFCznKWLR-r8NaS2UbwnpVhF8IXvkpjpFS-LCDA&code_challenge_method=S256&cobrandid=ab0455a0-8d03-46b9-b18b-df2f57b9e44c&fl=dob%2Cflname%2Cwld");
+    else if (newType === "icloud") setNewUrl("https://www.icloud.com/");
   }, [newType]);
 
   const handleContextMenu = (e: React.MouseEvent, account: Account) => {
@@ -438,7 +438,13 @@ export default function AmbientGrid({
           </h2>
         </div>
         <p className="text-xs text-obsidian-text-muted truncate mt-1">
-          {account.url}
+          {(() => {
+            try {
+              return new URL(account.url).hostname;
+            } catch {
+              return account.url;
+            }
+          })()}
         </p>
       </div>
     </div>
@@ -1122,7 +1128,15 @@ export default function AmbientGrid({
                         </div>
                         <div className="flex flex-col">
                           <span className="text-xs font-bold">{acc.name}</span>
-                          <span className="text-[10px] text-obsidian-text-muted truncate max-w-[300px]">{acc.url}</span>
+                          <span className="text-[10px] text-obsidian-text-muted truncate max-w-[300px]">
+                            {(() => {
+                              try {
+                                return new URL(acc.url).hostname;
+                              } catch {
+                                return acc.url;
+                              }
+                            })()}
+                          </span>
                         </div>
                       </div>
                       <span className="text-[9px] uppercase font-extrabold tracking-widest text-obsidian-text-muted bg-obsidian px-2 py-0.5 rounded-md">
